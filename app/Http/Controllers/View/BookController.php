@@ -27,13 +27,27 @@ class BookController extends Controller
 		return view('product')->with('products',$products);
 	}
 
-	public function toPdtContent($product_id){
+	public function toPdtContent(Request $request, $product_id){
 
 		$product = Product::find($product_id);
 		$pdt_content = Pdt_content::where('product_id',$product_id)->first();
 		$pdt_images = Pdt_images::where('product_id',$product_id)->get();
+
+		$bk_cart = $request->cookie('bk_cart');
+		$bk_cart_arr = ($bk_cart != null ?  explode(',',$bk_cart) : array());
+
+		$count = 0;
+		foreach ($bk_cart_arr  as $value){
+			$index = strpos($value,':');
+			if(substr($value,0 , $index) == $product_id){
+				$count = ((int)substr($value,$index+1));
+				break;
+			}
+		}
+
 		return view('pdt_content')->with('product',$product)
 			                            ->with('pdt_content',$pdt_content)
-										->with('pdt_images',$pdt_images);
+										->with('pdt_images',$pdt_images)
+										->with('count',$count);
 	}
 }

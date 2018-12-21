@@ -14,7 +14,6 @@ class CartController extends Controller
 	public function addCart( Request $request,$product_id){
 
 		$bk_cart = $request->cookie('bk_cart');
-		//return $bk_cart;
 		$bk_cart_arr = ($bk_cart != null ?  explode(',',$bk_cart) : array());
 
 		$count=1;
