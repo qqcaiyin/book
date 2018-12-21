@@ -38,4 +38,5 @@ Route::group(['prefix' => 'service'],function(){
 	Route::post('login', 'service\MemberController@login');//验证登录信息
 	Route::any('validate_phone/send', 'service\ValidateCodeControler@sendSMS');
 	Route::get('category/parent_id/{parent_id}', 'service\BookController@getCategoryParentId');
+	Route::get('cart/add/{product_id}', 'service\CartController@addCart');
 });

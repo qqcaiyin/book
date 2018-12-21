@@ -74,8 +74,7 @@
 
 @section('my-js')
     <script  src=""></script>
-    <script type="text/javascript">
-    </script>
+
     <script>
 
         $(function(){
@@ -137,7 +136,15 @@
                 $('.num li').eq(_index).addClass('active').siblings().removeClass('active');
                 $('.des li').eq(_index).removeClass('hide').siblings().addClass('hide');
             })
-
         })
     </script>
+    <script type="text/javascript">
+
+
+
+
+
+    </script>
+
+
 @endsection
