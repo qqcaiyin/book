@@ -35,7 +35,6 @@ class BookController extends Controller
 
 		$bk_cart = $request->cookie('bk_cart');
 		$bk_cart_arr = ($bk_cart != null ?  explode(',',$bk_cart) : array());
-
 		$count = 0;
 		foreach ($bk_cart_arr  as $value){
 			$index = strpos($value,':');

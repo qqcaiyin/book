@@ -184,8 +184,8 @@ class MemberController extends Controller
 		$m3_result->status = 0;
 		$m3_result->message = "登录成功";
 
-		Session::put('username',$username);
-		Session::put('password',$password);
+		//Session::put('username',$username);
+		Session::put('member',$member);
 
 		return $m3_result->toJson();
 

@@ -32,6 +32,8 @@ Route::get('login', function () {
 	Route::get('/product/category_id/{catefory_id}', 'View\bookController@toProduct');
 	Route::get('/product/{product_id}', 'View\bookController@toPdtContent');
 
+	Route::get('/cart', 'View\CartController@toCart')->middleware(['check.login']);;
+//
 Route::group(['prefix' => 'service'],function(){
 	Route::any('validate_code/create', 'service\ValidateCodeControler@create');
 	Route::any('validate_email', 'service\ValidateCodeControler@validateEmail');//验证邮箱
@@ -39,4 +41,12 @@ Route::group(['prefix' => 'service'],function(){
 	Route::any('validate_phone/send', 'service\ValidateCodeControler@sendSMS');
 	Route::get('category/parent_id/{parent_id}', 'service\BookController@getCategoryParentId');
 	Route::get('cart/add/{product_id}', 'service\CartController@addCart');
+	Route::get('/delete', 'service\CartController@deleteCart');
+
+	//Route::get('/cart', 'View\CartController@toCart');
+});
+
+Route::group(['middleware' => 'check.login'],function() {
+	Route::get('/order_commit/{product_id}', 'view\OrderController@toCharge');
+	Route::get('/order_list/', 'view\OrderController@toOrderList');
 });

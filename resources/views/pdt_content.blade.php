@@ -6,10 +6,10 @@
     <style>
         *{margin: 0;padding:0; }
         ul{list-style: none;}
-        .banner{width: 600px;height: 300px;border: 0px solid #ccc;margin: 0px auto;position: relative;overflow: hidden;z-index: 1;}
+        .banner{width: 100%;height: 300px;border: 0px solid #ccc;margin: 0px auto;position: relative;overflow: hidden;z-index: 1;}
         .img{position: absolute;top: 0;left: 0;}
         .des{position: absolute;bottom: 0;left: 0;z-index: -2; background: #0000C2 }
-        .des li{float: left;width: 600px;}
+        .des li{float: left;width: 100%;}
         .img li{float: left;}
         .num{position: absolute;bottom: 20px;width: 100%;text-align: right;font-size: 0;}
         .num li{width: 15px;height: 15px;background:rgba(0,0,0,0.5);display: block;border-radius: 100%;display: inline-block;margin: 0 5px;cursor: pointer;}
@@ -22,52 +22,61 @@
     </style>
 
     <div class="page">
-    <div class="banner">
-        <ul class="img">
-            @foreach($pdt_images as $pdt_image)
-                <div>
-                   <li><a ><img   width="600" height="300"   src="{{$pdt_image->image_path}}"  ></a></li>
+
+
+        @if($pdt_images )
+            <div class="banner">
+                <ul class="img">
+                    @foreach($pdt_images as $pdt_image)
+                        <div>
+                            <li><a ><img   width="600" height="300"   src="{{$pdt_image->image_path}}"  ></a></li>
+                        </div>
+                    @endforeach
+                </ul>
+
+                <ul class="num"></ul>
+                <ul class="des" style=" background: #000; ">
+                    @foreach($pdt_images as $index => $pdt_image)
+                        <li  class="" ></li>
+                    @endforeach
+                </ul>
+            </div>
+        @else
+
+        @endif
+            <div class="weui_cells_title">
+                <span class="bk_title">{{$product->name}}</span>
+                <span class="bk_price1"  >￥ {{$product->price}}</span>
+            </div>
+            <div class="weui_cells">
+                <div class="weui_cell">
+                    <p class="bk_summary">{{$product->summary}}</p>
                 </div>
-            @endforeach
-        </ul>
-
-        <ul class="num"></ul>
-        <ul class="des" style=" background: #000; ">
-            @foreach($pdt_images as $index => $pdt_image)
-                <li  class="" ></li>
-            @endforeach
-        </ul>
-
-
-    </div>
-    <div class="weui_cells_title">
-        <span class="bk_title">{{$product->name}}</span>
-        <span class="bk_price1"  >￥ {{$product->price}}</span>
-    </div>
-    <div class="weui_cells">
-        <div class="weui_cell">
-            <p class="bk_summary">{{$product->summary}}</p>
-        </div>
-    </div>
+            </div>
 
     <div class="weui_cells_title">详细介绍</div>
     <div class="weui_cells">
         <div class="weui_cell">
-            <p>
-                {!!   $pdt_content->content !!}
-            </p>
+
+            @if($pdt_content != null)
+                <p>
+                    {!!   $pdt_content->content !!}
+                </p>
+            @else
+
+            @endif
+
+
         </div>
     </div>
     </div>
-
-
 
 <div class="bk_fix_bottom">
     <div class="bk_half_area">
         <button class="weui_btn weui_btn_primary" onclick="_addCart()">加入购物车</button>
     </div>
     <div class="bk_half_area">
-        <button class="weui_btn weui_btn_default" >结算（<span id="cart_num" class="m3_price">{{$count}}</span>）</button>
+        <button class="weui_btn weui_btn_default" onclick="_toCart()" >查看购物车（<span id="cart_num" class="m3_price">{{$count}}</span>）</button>
     </div>
 </div>
 @endsection
@@ -180,6 +189,11 @@
                 }
             })
 
+        }
+
+        function _toCart(){
+
+            location.href = '/cart';
 
         }
 

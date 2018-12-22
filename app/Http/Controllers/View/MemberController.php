@@ -9,9 +9,10 @@ use App\Http\Controllers\Controller;
 
 class MemberController extends Controller
 {
-	public function tologin(){
+	public function tologin( Request $request){
 
-		return view('login');
+		$return_url = $request->input('return_url','');
+		return view('login')->with('return_url', urldecode($return_url));
 	}
 
 	public function register(){
