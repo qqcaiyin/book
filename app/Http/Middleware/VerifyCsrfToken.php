@@ -12,6 +12,9 @@ class VerifyCsrfToken extends BaseVerifier
      * @var array
      */
     protected $except = [
-        //
+		'/service/pay/ali_notify',
+		'/service/pay/wx_notify',
+		'/service/upload/images',
+		'/service/uploadimg',
     ];
 }

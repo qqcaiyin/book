@@ -17,7 +17,6 @@ class CartController extends Controller
 
 		$cart_items =array();
 
-
 		$bk_cart = $request->cookie('bk_cart');
 		$bk_cart_arr = ($bk_cart != null ?  explode(',',$bk_cart) : array());
 
@@ -65,8 +64,8 @@ class CartController extends Controller
 						$temp->save();
 					}
 					$exist = true;
-					break;
-				}
+					break;}
+
 			}
 
 			//不存在则存起来

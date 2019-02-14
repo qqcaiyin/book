@@ -26,8 +26,7 @@
                     </div>
                 </label>
             @endforeach
-
-                <div class="bk_fix_bottom">
+                <div class="bk_fix_bottom">laravel
                     <div class="bk_half_area">
                         <button class="weui_btn weui_btn_primary" onclick="_toCharge();">结算</button>
                     </div>

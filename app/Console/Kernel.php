@@ -14,6 +14,7 @@ class Kernel extends ConsoleKernel
      */
     protected $commands = [
         Commands\Inspire::class,
+		Commands\OrderCancel::class,
     ];
 
     /**
@@ -26,5 +27,7 @@ class Kernel extends ConsoleKernel
     {
         $schedule->command('inspire')
                  ->hourly();
+		$schedule->command('order:cancel')->everyMinute();
+
     }
 }

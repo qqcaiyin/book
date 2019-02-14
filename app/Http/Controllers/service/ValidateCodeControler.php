@@ -22,46 +22,128 @@ class ValidateCodeControler extends Controller
 		return $v->make();
 	}
 
-	public  function sendSMS(Request  $res){
+	/**
+	 *	用户注册接口
+	 * @return[type][description]
+	 */
+	public function userApi(Request $request){
 
 		$m3_result = new M3Result;
 
-		$phone =$res->input('phone','');
-		if($phone == ''){
-			$m3_result->status = 1;
-			$m3_result->message = "手机号不能为空";
-			return $m3_result->toJson();
-		}
-		if(strlen($phone) != 11 || $phone[0] != '1') {
-			$m3_result->status = 2;
-			$m3_result->message = '手机格式不正确';
-			return $m3_result->toJson();
-		}
+		$data = $request->all();
+		$data = $this->inputCheck($data);
 
-			$tempPhone = TempPhone::where('phone', $phone)->first();
-			if($tempPhone == null) {
-
-				$sendTemp = new SendTemplateSMS;
-				$code='';
-				$charset = '1234567890';
-				$_len = strlen($charset) - 1;
-				for($i = 0;$i < 6;++$i){
-					$code .= $charset[mt_rand(0,$_len)];
-				}
-				$m3_result = $sendTemp->sendTemplateSMS($phone,array($code,60),1);
-				if($m3_result->status ==0 )
-				{
-					$tempPhone = new TempPhone;
-					$tempPhone->phone = $phone;
-					$tempPhone->code = $code;
-					$tempPhone->deadline = time()+3600;//5分钟后过期
-					$tempPhone->save();
-				}
+/**简单注册的号码是否可用**/
+		if($data['act'] == 'check_moble'){
+			//检测手机号码是否已存在
+			$res = Member::where('phone', $data['moble'])->first();
+			if($res){
+				$m3_result->status = 10;
+				$m3_result->message = "本手机号已注册，可直接登录";
 			}else{
-				$m3_result->status = -1;
-				$m3_result->message = '手机号已注册';
+				$m3_result->status = 0;
+				$m3_result->message = "可注册使用";
+			}
+			return $m3_result->toJson();
+		}else if($data['act'] == 'send_sms'){
+/**发送短信验证码**/
+			return $this->sendSMS($data);
+
+		}else if($data['act'] == 'reg'){
+/**注册**/
+			$res = Member::where('phone',$data['tel'])->first();
+			if($res){
+				$m3_result->status = 0;
+				$m3_result ->message = "已注册成功";
 				return $m3_result->toJson();
 			}
+			//读取库中是否包含此号码的短信验证码
+			$tempPhone = TempPhone::where('phone',$data['tel'])->first();
+			if(empty($tempPhone)){
+				$m3_result->status = 11;
+				$m3_result ->message = "重新发送验证码";
+				return $m3_result->toJson();
+			}
+			//
+			if($tempPhone->code == $data['smscode']){
+				if(time()>$tempPhone->deadline){
+					$m3_result->status = 12;
+					$m3_result->message = "验证码过期";
+					return $m3_result->toJson();
+				}
+				$member=array(
+					'nickname'=>$data['username'],
+					'phone'=>$data['tel'],
+					'password'=>md5($data['password']),
+					'active'=>1
+				);
+				$res = Member::insertGetId($member);
+				if($res){
+					$m3_result->status = 0;
+					$m3_result->message = "注册成功";
+					return $m3_result->toJson();
+				}else{
+					$m3_result->status = 13;
+					$m3_result->message = "写入失败";
+					return $m3_result->toJson();
+				}
+			}else{
+				$m3_result->status = 13;
+				$m3_result->message = "短信验证码不对";
+				return $m3_result->toJson();
+			}
+		}
+	}
+	/**
+	 * 用户输入过滤
+	 * @return[type][description]
+	 */
+	function inputCheck($data){
+		foreach($data as $key =>&$d){
+			$d = trim($d);
+			$d = stripslashes($d);
+			$d = htmlspecialchars($d);
+		}
+		return $data;
+	}
+	/**
+	 *	发送验证码
+	 * @return[type][description]
+	 */
+	public  function sendSMS($data){
+
+		$m3_result = new M3Result;
+/*****调试****/
+	//	$m3_result->status = 0;
+	//	$m3_result->message = "发送成功";
+	//	return $m3_result->toJson();
+/*****end****/
+
+		$moble =$data['moble'];
+
+		$sendTemp = new SendTemplateSMS;
+		$code='';
+		$charset = '1234567890';
+		$_len = strlen($charset) - 1;
+		for($i = 0;$i < 6;++$i){
+			$code .= $charset[mt_rand(0,$_len)];
+		}
+		$m3_result = $sendTemp->sendTemplateSMS($moble,array($code,60),1);
+		if($m3_result->status ==0 )
+		{
+			//
+			$res = TempPhone::where('phone',$moble)->delete();
+
+			$tempPhone = new TempPhone;
+			$tempPhone->phone = $moble;
+			$tempPhone->code = $code;
+			$tempPhone->deadline = time()+3600;//5分钟后过期
+			$tempPhone->save();
+
+			$m3_result->status = 0;
+			$m3_result->message = "发送成功";
+		}
+
 		return $m3_result->toJson();
 	}
 

@@ -6,7 +6,7 @@
     <style>
         *{margin: 0;padding:0; }
         ul{list-style: none;}
-        .banner{width: 100%;height: 300px;border: 0px solid #ccc;margin: 0px auto;position: relative;overflow: hidden;z-index: 1;}
+        .banner{width: 100%;height: 220px;border: 0px solid #ccc;margin: 0px auto;position: relative;overflow: hidden;z-index: 1;}
         .img{position: absolute;top: 0;left: 0;}
         .des{position: absolute;bottom: 0;left: 0;z-index: -2; background: #0000C2 }
         .des li{float: left;width: 100%;}
@@ -29,7 +29,7 @@
                 <ul class="img">
                     @foreach($pdt_images as $pdt_image)
                         <div>
-                            <li><a ><img   width="600" height="300"   src="{{$pdt_image->image_path}}"  ></a></li>
+                            <li><a ><img   width="500" height="200"   src="{{$pdt_image->image_path}}"  ></a></li>
                         </div>
                     @endforeach
                 </ul>
@@ -59,9 +59,11 @@
         <div class="weui_cell">
 
             @if($pdt_content != null)
-                <p>
+                <ul class="infos" style="width: 100%; ">
                     {!!   $pdt_content->content !!}
-                </p>
+
+                </ul>
+
             @else
 
             @endif

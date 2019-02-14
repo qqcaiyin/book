@@ -14,7 +14,6 @@ class BookController extends Controller
 	public function getCategoryParentId($parent_id){
 
 		$categorys = Category::where('parent_id',$parent_id)->get();
-
 		$m3_result = new M3Result;
 		$m3_result->status = 0;
 		$m3_result->message = '返回成功';
