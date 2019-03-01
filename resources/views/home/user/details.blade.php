@@ -138,65 +138,77 @@
                                 <p>提交订单</p>
                                 <p>{{date('Y-m-d',$orderDetail['add_time'])}}</p>
                             </li>
-                            <li class=" ll  next-line{{$orderDetail['status_shippiing'][1]}}   ">
+                            <li class=" ll  next-line{{$orderDetail['status_shipping'][1]}}   ">
                             </li>
                             <li>
                                 <div >
-                                    <i class="icon-wuliu order-send{{$orderDetail['status_shippiing'][2]}}  "></i>
+                                    <i class="icon-wuliu order-send{{$orderDetail['status_shipping'][2]}}  "></i>
                                 </div>
-                                <p>发货</p>
-                                <p></p>
+                                <p>正在发货</p>
+                                @if($orderDetail['status_shipping'][2] == 1)
+                                <p>{{date('Y-m-d',$orderDetail['shipping_time'])}}</p>
+                                @endif
                             </li>
-                            <li class=" ll  next-line{{$orderDetail['status_shippiing'][3]}} ">
+                            <li class=" ll  next-line{{$orderDetail['status_shipping'][3]}} ">
                             <li>
                                 <div >
-                                    <i class="icon-wuliu order-qs'.{{$orderDetail['status_shippiing'][4]}}"></i>
+                                    <i class="icon-wuliu order-qs{{$orderDetail['status_shipping'][4]}}"></i>
                                 </div>
-                                <p>签收{{$orderDetail['status_shippiing'][2]}}</p>
-                                <p></p>
+                                <p>签收</p>
+                                @if($orderDetail['status_shipping'][4] == 1)
+                                    <p>{{date('Y-m-d',$orderDetail['confirm_time'])}}</p>
+                                @endif
                             </li>
-                            <li class=" ll  next-line{{$orderDetail['status_shippiing'][5]}}  ">
+                            <li class=" ll  next-line{{$orderDetail['status_shipping'][5]}}  ">
                             <li>
                                 <div>
-                                    <i class="icon-wuliu order-end{{$orderDetail['status_shippiing'][6]}} "></i>
+                                    <i class="icon-wuliu order-end{{$orderDetail['status_shipping'][6]}} "></i>
                                 </div>
                                 <p>完成</p>
-                                <p></p>
+                                <p>{{date('Y-m-d',$orderDetail['complete_time'])}}</p>
                             </li>
                         </ul>
                     </div>
-
                 </div>
 
 
 
                 <div  class="pwlp">
                     <div class="tdl">
-                        订单状态: <span style="font-weight: bolder; color:#007cc3;">{{$orderDetail['status_name']}}</span>
+                        <div >
+                            订单状态: <span style="font-weight: bolder; color:#007cc3;">{{$orderDetail['status_name']}}</span>
 
+                            @if($orderDetail['next_stepdesc'] == 'topay' )
+                            <a class="topay" style="margin: 5px  40px; " >去付款</a>
+                            @endif
+                            @if($orderDetail['next_stepdesc'] == 'tosign' )
+                                <a href=" {{url('/details?act=sign&oid='.$orderDetail['order_sn'])}} " class="topay" style="margin: 5px  40px; " >签收</a>
+                            @endif
+                            @if($orderDetail['next_stepdesc'] == 'tomsg' )
+                                <a class="topay"  style="margin: 5px  40px;" href=" {{url('/comment?oid='.$orderDetail['order_sn'])}} " >去评论</a>
+                            @endif
+
+                        </div>
                     </div>
                     <div class="tdr" >
+
                         <div style=" float:left;border-bottom:1px solid #eee; width:100%; height:30px;">
-                           <p style="color:#007cc3;">申通快递：3392006643588</p>
+                           <p style="color:#007cc3;">{{$orderDetail['shipping_name']}}：{{$orderDetail['shipping_sn']}}</p>
                         </div>
                         <div style="margin-top: 20px;margin-left: 30px; border:1px solid #fff;   ;min-height:200px;max-height:200px;overflow-y: auto;	">
-                            <p>2019-01-07 14:31:40 您的订单已发货：申通快递,快递单号3392006643588</p>
-                            <p>2019-01-07 14:28:58 支付订单</p>
-                            <p>2019-01-07 12:24:16 您提交了订单</p>
-                            <p>2019-01-07 12:24:16 您提交了订单</p>
-                            <p>2019-01-07 12:24:16 您提交了订单</p>
-                            <p>2019-01-07 12:24:16 您提交了订单</p>
-                            <p>2019-01-07 12:24:16 您提交了订单</p>
-                            <p>2019-01-07 12:24:16 您提交了订单</p>
-                            <p>2019-01-07 12:24:16 您提交了订单</p>
-                            <p>2019-01-07 12:24:16 您提交了订单</p>
-                            <p>2019-01-07 12:24:16 您提交了订单</p>
-                            <p>2019-01-07 12:24:16 您提交了订单</p>
+                            @if($shipInfo['message'] == 'ok')
+                                @foreach($shipInfo['data'] as $key => $v)
+                                    @if($key == 0)
+                                        <p style="font-size: 16px; color:#007cc3;font-weight: bolder;">{{ $v['time']  }} :{{$v['context']}}</p>
+                                    @else
+                                        <p>{{ $v['time']  }} :<span style="margin-left: 20px;">{{$v['context']}}</span></p>
+                                    @endif
+                                @endforeach
+                            @endif
                         </div>
 
                     </div>
                 </div>
-
 
                 <div class="infor-buy-view">
                     <div class="addr">

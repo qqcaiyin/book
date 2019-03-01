@@ -32,7 +32,7 @@
                 <th width="100">类型</th>
                 <th width="100">变动值</th>
                 <th width="">明细</th>
-                <th width="80">时间</th>
+                <th width="200">时间</th>
             </tr>
             </thead>
             @if($balance_logs->total()>0)
@@ -40,9 +40,17 @@
                 @foreach($balance_logs as $balance_log)
                     <tr class="text-c">
                         <td style="text-align: left;">{{$balance_log->nickname}}</td>
-                        <td>{{$balance_log->type}}</td>
-                        <td>{{$balance_log->value}}</td>
-                        <td>{{$balance_log->disc}}</td>
+                        <td>
+                            @if($balance_log->type == 0) 余额动态
+                            @elseif($balance_log->type == 3 ) 积分动态
+                            @endif
+                        </td>
+                        <td>
+                            @if($balance_log->pm ==0) <span style="color:red;">-{{$balance_log->num}} </span>
+                            @elseif($balance_log->pm == 1 ) <span style="color:green;">+{{$balance_log->num}} </span>
+                           @endif
+                        </td>
+                        <td>{{$balance_log->desc}}</td>
                         <td>{{date('Y-m-d h:m:s',$balance_log->time)}}</td>
                     </tr>
                 @endforeach

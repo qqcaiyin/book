@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Home\View;
 
 use App\Entity\Category;
+use App\Entity\Comment;
 use App\Entity\Keywords;
 use App\Entity\Nav;
 use App\Entity\Pdt_content;
@@ -62,8 +63,10 @@ class ProductController extends CommonController
 		}
 		//获取面包屑
 		$cateParents = Category::getCatParent($productInfo->category_id);
+		//获取用户评价
+		$comments = $this->getComments($id);
 
-		return view('home/product/show' ,compact('cateParents','productInfo','attrList','specList'));
+		return view('home/product/show' ,compact('cateParents','productInfo','attrList','specList' ,'comments'));
 	}
 
 
@@ -77,16 +80,21 @@ class ProductController extends CommonController
 		$m3_result = new M3Result;
 		$m3_result->status = 10;
 		if( $act == 'sku_num'){
-			//获取查询规格的库存
+			//获取查询规格的 ：库存 ,价格
 			$pdt_id = isset($data['gid']) ? $data['gid']: 0;
 			$spec = isset($data['spec']) ? $data['spec'] : '';
 			$res = Pdt_sku::getSkuInfo($pdt_id , $spec);
 			if($res){
 				$m3_result->status = 0;
-				$m3_result->data = $res['sku_num'];
+				$m3_result->data['price'] = $res['sku_price'];
+				$m3_result->data['num'] = $res['sku_num'];
 			}
 			return  $m3_result->toJson();
 		}
+
+
+
+
 
 
 	}

@@ -35,19 +35,19 @@
         .dd-detail{ display: table;  padding: 0; width:100%; background-color: #fff; }
         .dd-detail div{ margin:0 auto;  }
         .dd-detail ul{  background-color: #fff; }
-        .dd-detail ul li{  float:left; disply:table-cell; vertical-align: top; border-right: 1px solid  #eee; text-align: center;  display: inline-block;}
-        .dd-coll{float: left;  margin: 0px; width:500px; padding:0; display: table-cell;  }
+        .dd-detail ul li{  float:left; disply:table-cell; vertical-align: top;  text-align: center;  display: inline-block;}
+        .dd-coll{float: left;  margin: 0px; width:60%; padding:0; display: table-cell;  }
         .dd-coll .more-pro{
             padding:15px;  width:550px;
         }
 
-        .price { display: table-cell;vertical-align: top;width:100px;text-align: center;}
-        .num { display: table-cell;vertical-align: top;width:100px;text-align: center;}
+        .price { display: table-cell;vertical-align: top;width:80px;text-align: center;}
+        .num { display: table-cell;vertical-align: top;width:80px;text-align: center;}
 
-        .dd-col2{  width:130px; padding: 20px 5px  ; height:100%; }
+        .dd-col2{  width:100px; padding: 20px 5px  ; height:100%; }
         .dd-col2.b{ font-size: 14px; margin-bottom: 8px; display: inline-block; font-weight: bolder;}
-        .dd-col3{ width:130px;  padding: 15px 18px 15px 18px ; }
-        .dd-col4{ float: right;  height:100%;   padding: 15px 18px 15px 18px ; border:none; }
+        .dd-col3{ width:100px;  padding: 15px 18px 15px 18px ; }
+        .dd-col4{ float: right; width:100px; height:100%;   padding: 15px 18px 15px 18px ; border:none; }
         .dd-col4 a{display:block; width:78px; height:24px; border:1px solid #dcdcdc; text-align: center; line-height: 24px;
             margin: 8px 0 0 8px;}
         .dd-col4 a:hover{ border:1px solid #007cc3;  }
@@ -274,10 +274,20 @@
                                                 <div class="num" >
                                                     {{$pdt['buy_number']}}
                                                 </div>
+                                                <div class="num">
+                                                    @if($order->status == 6)
+                                                        @if($pdt['status'] == 0)
+                                                            <a href="{{url('/applyservice? son_sn='.$pdt['order_son_sn'] .'&oid=' .$order->order_sn )}}" >申请售后</a>
+                                                        @elseif($pdt['status'] == 1)
+                                                            <a href="{{url('/servicedetails? sn='.$pdt['order_son_sn'] )}}" >处理中</a>
+                                                        @elseif($pdt['status'] == 2)
+                                                            <a href="{{url('/servicedetails? sn='.$pdt['order_son_sn'] )}}" >已完成</a>
+                                                        @endif
+                                                    @endif
+                                                </div>
                                             </div>
                                         @endforeach
                                     </li>
-
                                     <li  class="dd-col2"  >
 
                                         总额:<b >￥{{$order->order_amount}}</b>
@@ -290,11 +300,14 @@
                                     <li class="dd-col4" style="border-right:none;  "   >
 
                                         @if($order->status == 0)
-                                            <a class="style" style="border:1px solid red; color:red;">去支付</a>
-                                            <a class="style" href="javascript:void(0);" onclick="order_cancel(this,'{{$order->order_sn}}' ,'{{$order->id}}')">取消订单</a>
+                                            <a class="style" >去支付</a>
+                                            <a href="javascript:void(0);" onclick="order_cancel(this,'{{$order->order_sn}}' ,'{{$order->id}}')">取消订单</a>
                                         @endif
-                                        @if($order->status >= 5)<a style="border:1px solid red; color:red;">确认收货</a>@endif
-                                        @if($order->status >= 1)<a>再次购买</a>@endif
+                                        @if($order->status == 5)<a style="border:1px solid red; color:red;" href=" {{url('/details?act=sign&oid='.$order->order_sn)}} ">确认收货</a>@endif
+                                        @if($order->status == 6)
+                                            <a href="{{url('/comment?oid=' .$order->order_sn )}}" style="border:1px solid #007cc3;">评论</a>
+                                        @endif
+                                        @if($order->status >= 1)<a   href="{{url('/service/cart? act=readd_cart&oid=' . $order->id)}}">再次购买</a>@endif
 
                                     </li>
                                 </ul>
@@ -431,7 +444,8 @@
 
 <!--bengin 轮播 bengin -->
 <script type="text/javascript" src="/admin/lib/jquery/1.9.1/jquery.min.js"></script>
-<script src="/home/js/jquery.SuperSlide.2.1.1.js" type="text/javascript" ></script>
+<script type="text/javascript" src="/admin/lib/layer/2.4/layer.js"></script>
+
 <!--End 轮播 End -->
 <script>
 
@@ -444,7 +458,21 @@
         $(this).addClass('current');
         $(this).siblings().removeClass('current');
     });
+    function  order_cancel(obj,sn ,oid){
+        layer.confirm('确认要取消订单吗？',function (index) {
+            var url = '/service/order'
+            $.get(url,{ act:'order_cancel' , order_sn:sn ,oid:oid},function(data){
+                console.log(data);
+                if(data.status == 0){
+                    layer.msg(data.message, {icon:1, time:2000});
+                    location.replace(location.href);
+                }
+                console.log(data);
 
+            },'json');
+
+        });
+    }
 
 
 </script>

@@ -22,7 +22,7 @@
     <script type="text/javascript" src="/admin/lib/DD_belatedPNG_0.0.8a-min.js" ></script>
     <script>DD_belatedPNG.fix('*');</script>
     <![endif]-->
-    <title>小米商城后台管理</title>
+    <title>简易后台管理</title>
     <meta name="keywords" content="H-ui.a">
     <meta name="description" content="H-ui.admin">
 </head>

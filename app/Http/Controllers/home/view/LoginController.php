@@ -35,9 +35,14 @@ class LoginController extends Controller
 		if($memberName=Session::get('member')){
 			return redirect('home/index');
 		}else{
-			//获取上一次访问的地址
-			$http_refer = $_SERVER['HTTP_REFERER'];
-			$http_refer = urlencode($http_refer);
+			//获取上一个访问的地址 ,没有的话，默认登陆跳转到主页面
+			if(isset($_SERVER['HTTP_REFERER'])){
+				$http_refer = $_SERVER['HTTP_REFERER'];
+				$http_refer = urlencode($http_refer);
+			}else{
+				$http_refer = '/';
+			}
+
 			//return redirect(urlencode($http_refer) );
 			return view('home/login',compact('http_refer'));
 		}

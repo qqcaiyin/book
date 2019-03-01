@@ -39,9 +39,10 @@
 <div class="top">
     <div class="logo"></div>
     <div class="search">
-        <form>
-            <input type="text" value="" class="s_ipt" />
+        <form name="search" action="{{url('/cate') }}"  method="get">
+            <input type="text"  id="words"  name="words" @if(isset($data['at']) && $data['at'] =='search') value="{{$data['words']}}" @else value=""@endif class="s_ipt" />
             <input type="submit" value="搜索" class="s_btn" />
+            <input type="hidden" name="at"  value="search"  />
         </form>
         <span class="fl">
            @foreach($keywords as $keyword)
@@ -114,23 +115,27 @@
 </div>
 <!--End Menu End-->
 <div class="i_bg">
+    @if($cateParents !='')
     <div class="postion">
         <span class="fl">
             <a href="{{url('/')}}">首页</a>
-            @foreach($cateParents as $cateParent)
-              ><a href="{{url('/home/cate?at=t2&id='.$cateParent->id)}}">  {{$cateParent->name}}</a>
-            @endforeach
+                @foreach($cateParents as $cateParent)
+                  ><a href="{{url('/home/cate?at=t2&id='.$cateParent->id)}}">  {{$cateParent->name}}</a>
+                @endforeach
         </span>
     </div>
+    @endif
     <!--Begin 筛选条件 Begin-->
     <div class="content mar_10" >
             <div class="filter-box">
                     <dl class="filter-list clearfix"  >
                         <dt style="float: left; width:100px;text-align: left;">分类：</dt>
+                        @if($sonCates !='')
                         <dd  @if(isset($t3)) class="dd "@else class="active dd" @endif ><a href="{{url('/home/cate?at=t2&id='.$data['cate'])}}" >全部</a></dd>
-                        @foreach($sonCates as $val)
-                            <dd  @if( isset($data)&&($data['id'] == $val['id'])) class="dd active"@else class=" dd" @endif ><a href="{{url('/home/cate?at=t2&cate='.$data['cate']. '&id='. $val['id'])}}" >{{$val['name']}}</a></dd>
-                        @endforeach
+                            @foreach($sonCates as $val)
+                                <dd  @if( isset($data)&&($data['id'] == $val['id'])) class="dd active"@else class=" dd" @endif ><a href="{{url('/home/cate?at=t2&cate='.$data['cate']. '&id='. $val['id'])}}" >{{$val['name']}}</a></dd>
+                            @endforeach
+                        @endif
                     </dl>
                     <dl class="filter-list clearfix" style="vertical-align: middle; padding: 20px;">
                         <dt style="float: left; width:100px;text-align: left; ">品牌：</dt>
@@ -145,19 +150,37 @@
     <div class="content mar_20">
         <div class="l_list">
             <div class="list_t">
-            	<span class="fl list_or">
-                	<a href="#" class="now">新品</a><a style="color:#bbb;">|</a>
-                    <a href="#">
+            	<span class="fl list_or" style="width: 100%;" >
+                	<a href="javascript:;"  onclick="orderTp(this)"  @if(isset($data['n']) && $data['n']=='newgood') class="now"   @endif data-tp="newgood"   id="newgood"  >新品</a><a style="color:#bbb;">|</a>
+                    <a href="javascript:;" onclick="orderTp(this)"
+                       @if(isset($data['n']) && $data['n']=='saleup') data-tp="saledown"
+                       @else data-tp="saleup"
+                       @endif
+                        @if(isset($data['n']) && ($data['n']=='saleup'  || $data['n']=='saledown')) class="now"
+                        @else
+                                class=""
+                        @endif
+                    id="salenum" >
                     	<span class="fl">销量</span>
                         <span class="i_up">销量从低到高显示</span>
-                        <span class="i_down">销量从高到低显示</span>
-                    </a><a style="color:#bbb;">|</a>
-                    <a href="#">
+                        <span class="i_down" >销量从高到低显示</span>
+                    </a>
+                    <a style="color:#bbb;">|</a>
+                    <a href="javascript:;" onclick="orderTp(this)"
+                       @if(isset($data['n']) && $data['n']=='priceup') data-tp="pricedown"
+                       @else data-tp="priceup"
+                       @endif
+                       @if(isset($data['n']) && ($data['n']=='priceup'  || $data['n']=='pricedown')) class="now"
+                       @else
+                       class=""
+                       @endif
+                       id="price">
                     	<span class="fl">价格</span>
                         <span class="i_up">价格从低到高显示</span>
                         <span class="i_down">价格从高到低显示</span>
-                    </a><a style="color:#bbb;">|</a>
-                    <a href="#">评论最多</a>
+                    </a>
+                    <a style="color:#bbb;">|</a>
+                    <a href="javascript:;" onclick="orderTp(this)" style=" " data-tp="comment"   id="comment">评论最多</a>
                 </span>
                 <span class="fr"></span>
             </div>
@@ -281,6 +304,44 @@
 <script type="text/javascript" src="/admin/lib/layer/2.4/layer.js"></script>
 
 <script>
+
+    //产品排序
+    $('#newgood').click(function(){
+        if($(this).hasClass('now')){
+
+        }
+        $(this).addClass('now');
+        $(this).siblings('a').removeClass('now');
+
+
+
+    });
+
+        function orderTp(t){
+           var n =  $(t).data('tp');
+            $(t).addClass('now');
+            $(t).siblings('a').removeClass('now');
+
+            var words = $.trim($('#words').val());
+            var at='';
+            if(words !=''){
+              at='search'
+            }
+
+            location.href='/cate?at='+at+'&words='+words+'&n='+n;
+         //   $.get('/cate' ,{at:at,words:words,n:n},function(res){
+//
+        //    } ,'json'  )
+
+
+
+        }
+
+
+
+
+
+
 
     //添加收藏
     function addFav(obj,id){

@@ -2097,4 +2097,497 @@ function jianUpdate1(jian,id){
 
 
 </script>
+
+<script>
+    $(function() {
+    setTimeout(function() {
+    $("#goods-spec .it .select-mod").each(function() {
+    $(this).children("a").eq(0).trigger("click");
+    });
+    },10);
+
+    $("#goods-spec .it a").each(function() {
+    $(this).click(function() {
+    if ($(this).data("img") !='') {
+    var imgs = $(this).data("img");
+    var html ='';
+    if(imgs) {
+    $.each(imgs, function(k, v) {
+    html +='<li><a rel="bigimg" rev="'+v.img+'"><img src="'+v.thumb+'"></a></li>';
+    })
+    }
+
+    $("#imglist").html(html);
+    $(".slide-fish ul.smallImg").children("li").eq(0).find("img").trigger("mouseover");
+    }
+    });
+    });
+
+    })
+
+    var goods_id = $("#goods_id").val();
+    var time =0;
+    //回复
+    function reply(th) {
+    if (time != 0) {
+    msg("请别回复太快哦"); return;
+    }
+    var t = $(th),txt = t.parent().siblings().children(".textpj");
+    var reply = txt.attr("placeholder"),
+    content = $.trim(txt.val()),
+    pid = t.data("pid"),
+    ptype = t.data("ptype"),
+    cid = t.parents("li").attr("id");
+
+    if(content =='')
+    {
+    msg('请输入回复内容');
+    return;
+    }
+
+    $.getJSON("/user.html", {act:'add_comment_reply', gid: goods_id, pid: pid,ptype: ptype, content: content,cid:cid}, function(res) {
+    if(res.err && res.err != '') {
+    msg('操作失败，' + res.err);return;
+    }
+    if(res.url && res.url != '') {
+    window.location.href = res.url; return;
+    }
+    else
+    {
+    var html= '<div class="receive"><p><span class="user-name">yunec '+reply+'：</span>'+content+'</p></div>';
+    if (ptype==1) {
+    t.parents(".replylist").append(html);
+    } else{
+    t.parents(".receivebox").siblings(".replylist").append(html);
+    }
+    t.parents(".receivebox").hide().find(".textpj").val('');
+    var n = t.parents(".personeva").children().children("a").children("em");
+    n.html(parseInt(n.html())+1);
+    time =60;
+    var ti =setInterval(function() {
+    if (time == 0) {
+    clearInterval(i);return;
+    }
+    time--;
+    },1000);
+    }
+    });
+    };
+
+    $(".ul-pro-box li").each(function(){
+    if($(this).index()%4==3){
+    $(this).css("margin-right","4px");
+    }
+    if($(this).index()%4==0){
+    $(this).css("margin-left","4px");
+    }
+    });
+
+    //获取回复
+    function get_reply(t){
+    if ($(t).siblings(".replylist").hasClass("loaded")==false) {
+    var cid = $(t).parents("li").attr("id");
+    $.getJSON("/user.html", {act:'get_comment_reply', cid:cid}, function(res) {
+    if(res.err && res.err != '') {
+    }
+    else
+    {
+    var html='';
+    $.each(res.data, function(k, v) {
+    html += '<div class="receive"><div class="content"><span class="user-name">'+ v.uname +' 回复 '+ v.reply_name+'：</span><span>'+ v.content+'</span><p><a href="javascript:void(0);" onclick="javascript:show_replybox(this);" class="receivea">回复</a></p></div><span style="float:right;">'+ v.addtime +'</span>';
+        html += '';
+        html += '<div class="rec-box"><div class="inner"><textarea placeholder="回复 '+ v.uname +':" class="textpj" onkeyup="words_deal(this);" maxlength="120"></textarea></div>';
+            html += '<p> <span>还可以输入<em>120</em>字</span> <input type="submit" data-pid="'+v.id+'" data-ptype="1" value="提交" class="submita" onclick="javascript:reply(this);"/> </p></div></div>';
+    html += '</div>';
+    });
+    $(t).siblings(".replylist").append(html).addClass("loaded");
+    }
+    });
+    }
+    show_replybox(t);
+    };
+
+    //显示回复框
+    function show_replybox(th) {
+    var t =$(th);
+    t.siblings(".receivebox,.replylist").toggle();
+    t.parents(".content").siblings(".receivebox").toggle();
+    t.toggleClass("showvisi");
+    }
+
+    //
+    $(".evalute-titleul li").each(function(){
+    var t = $(this);
+    t.click(function(){
+    t.addClass("check").siblings().removeClass("check");
+    t.find("em").addClass("embold").siblings().removeClass("embold");
+    var level =t.data("level"),
+    page = t.data("page");
+
+    //加载评价数据
+    if (t.hasClass("loaded")==false) {
+    loadComment(t,level,page);
+    }
+    });
+    });
+
+    //加载更多评价
+    $(".loadmore").click(function() {
+    var t = $(".evalute-titleul").children().eq($(this).parents(".evalute-detail").index());
+    var level =t.data("level"),
+    page = t.data("page");
+    loadComment(t,level,page);
+    });
+
+    function loadComment(t,level,page) {
+    $("#"+(level==''?'all':level)).children(".loading").show();
+    $.getJSON("/user.html", {act:'get_comment', id:goods_id, level: level,page: page}, function(res) {
+    if(res.err && res.err != '') {
+
+    }
+    else
+    {
+    var html='';
+    $.each(res.data, function(k, v) {
+    html +='<li id="'+ v.id +'"><div class="column starevalute">';
+            html +='<div class="column rankevalute"><div class="member"><img src="'+(v.uimg!=''? v.uimg :'./view/default/images/avatar.jpg')+'" alt="" /></div>';
+                //html +='<span class="red">'+ v.grade_name +'</span>';
+                html +='<div class="menber-rank"><span>'+ v.anon_name +'</span></div></div>';
+            html +='<div class="grade-stars grade'+ v.star +'"></div><p> '+ v.addtime +' </p></div>';
+        html +='<div class="column personeva"><div class="comment">'+ v.content;
+                if (v.thumb && v.thumb.length>0) {
+                html +='<div class="show-pic"><dl>';
+                        $.each(v.thumb, function(key, val) {
+                        html +='<dd><a data-src="'+v.img[key]+'"><img src="'+val+'" width="80" height="80"/></a></dd>';
+                        });
+                        html+='</dl></div><div class="sc_picbox"><div class="sc_pictab"><a href="javascript:void(0);" class="a_up"><em class="icon-up"></em>收起</a><a href="javascript:void(0);" class="a_left"><em class="round-left"></em>向左旋转</a><a href="javascript:void(0);" class="a_right"><em class="round-right"></em>向右旋转</a></div><div class="sc_photo"><img src="'+v.img[0]+'" alt="" class="dyimg_src"/></div></div>';
+                }
+                html +='</div><div class="receive"><a href="javascript:void(0);" onclick="javascript:get_reply(this);" class="receivea showvisi">回复(<em>'+ v.reply_count +'</em>)</a>';
+                html +='<div class="receivebox">';
+                    html +='<div class="inner"><textarea placeholder="回复 '+ v.anon_name +':" class="textpj" onkeyup="words_deal(this);" maxlength="120"></textarea></div>';
+                    html +='<p> <span>还可以输入<em>120</em>字</span> <input type="submit" data-pid="'+ v.id +'" data-ptype="0" value="提交" class="submita" onclick="javascript:reply(this);" /> </p></div>';
+                html +='<div class="replylist"></div></div></div></li>';
+    });
+
+    level= level==''?'all':level;
+    $("#"+level).children("ul").append(html);
+    t.data("page",page + 1);
+    if (t.hasClass("loaded")==false) {
+    t.addClass("loaded");
+    }
+    if (res.data.length==0 || (res.res && res.res==1)) {
+    $("#"+level).children(".pages").html("没有更多评价了~");
+    }
+    inti_showpic();
+    }
+    $("#"+level).children(".loading").hide();
+    });
+    }
+
+    $(".tab-gbw").slide({trigger:"click"});
+    $(".slide-detail .hdd li").each(function(){
+    $(this).click(function(){
+    $(this).addClass("on").siblings().removeClass("on");
+    if($(this).index()==0){
+    $(".box1detail,.otherbox,.evalute,.box1 h3.title").show();
+    }
+    else if($(this).index()==1)
+    {
+    $(".box1detail,.otherbox").hide();
+    $(".evalute").show();
+    $(".box1 h3.title").hide();
+    }
+    else{
+    $(".box1detail,.evalute").hide();
+    $(".otherbox").show();
+    $(".box1 h3.title").hide();
+    }
+    });
+    });
+
+    $(".pps li:last-child").css("border-bottom","none");
+    $(document).ready(function() {
+    loadLayer();
+
+    $(".slide-fish").slide({ titCell:".smallImg li", mainCell:".bigImg", effect:"left", autoPlay:false,delayTime:200});
+    $(".slide-fish .small-scroll").slide({mainCell:"ul.smallImg",effect:"left",autoPlay:false ,autoPage: true,vis: 5,delayTime:100});
+    $(".slide-fish ul.smallImg").on("mouseover","li img", function() {
+    $(this).parents("li").css("border-color","#de342f").siblings().css({"border-color":"#fff"});
+    var s=$(this).parents(".small-scroll").siblings(".t2").children();
+    s.children(".main_img").prop("src", $(this).parent().prop("rev"));
+    s.children(".MagicZoomBigImageCont").find("img").prop("src", $(this).parent().prop("rev"));
+    });
+    });
+    $(".slider-protj").slide({titCell:".hd ul",mainCell:".bd ul",autoPage:true,effect:"top",autoPlay:false,vis:2});
+    $(window).scroll(function(){
+    var topproview=$(".pro-view").outerHeight()+$(".header").height();
+    if($(window).scrollTop()>topproview){
+    $(".pro-tab .hdd").addClass("hdfix");
+    }
+    else{
+    $(".pro-tab .hdd").removeClass("hdfix");
+    }
+    });
+
+
+
+
+
+    $(function() {
+
+        $("input[name='status']").change(function() {
+            if ($(this).val() == '8') {
+                $("#mod-refund").show();
+            }
+            else{
+                $("#mod-refund").hide();
+            }
+        });
+
+        $("#create-refund").click(function() {
+            var t = $("#create-refund");
+            var refund_fee = $.trim($("#refund_fee").val()), saleprice = $("#saleprice").html();
+            refund_fee = refund_fee==''? 0 : parseFloat(refund_fee);
+            saleprice = saleprice==''? 0 : parseFloat(saleprice);
+            if (refund_fee =='' || refund_fee=='') {
+                msg("请先填写退款金额");
+                return false;
+            }
+            if (refund_fee >saleprice) {
+                msg("退款金额不能大于商品金额");
+                return false;
+            }
+
+            $.getJSON("./admin.html?do=service", {act:'add_refund',id: 4, order_sn:18061457100100, refund_fee:refund_fee}, function (r) {
+                if (r.err) {
+                    msg(r.err);return;
+                }
+                msg("生成成功");
+                $("#refund_no").val(r.data.refund_no);
+                $("<span>退款单号：" + r.data.refund_no + "&nbsp;&nbsp;</span>").insertBefore(t);
+                if (r.data.refund_html !='') {
+                    t.replaceWith(r.data.refund_html);
+                    //t.attr({"href":r.data.refund_html, 'target':'_blank'}).html("确认退款").unbind("click");
+                } else{
+                    t.html("确认退款").attr("data-paycode", r.data.pay_code).unbind("click").bind('click', function() {
+                        addRefund(r.data.refund_no,refund_fee, t);
+                    });
+                }
+            });
+        });
+    });
+
+    function addRefund(refund_no,refund_fee, t)
+    {
+        $.getJSON("./admin.html?do=service", {act:'apply_refund', refund_no:refund_no, order_sn:18061457100100, refund_fee:refund_fee}, function (r) 			{
+            if (r.err) {
+                msg(r.err);return;
+            }
+
+            if (r.data.trade_msg && r.data.trade_msg!='') {
+                msg(r.data.trade_msg);
+                $("#msg").html("退款失败：" + r.data.trade_msg);
+                return;
+            }
+            msg("退款成功");
+            $("#msg").html('<b class="green">退款成功！</b>');
+            $("#btnreturn").remove();
+        });
+    }
+
+    var ok=false;
+    function check(th) {
+        if (ok) {
+            return true;
+        }
+        if ($("input[name='status']:checked").val() == '8') {
+            var refund_fee = $.trim($("#refund_fee").val()), saleprice = $("#saleprice").html();
+            refund_fee = refund_fee==''? 0 : parseFloat(refund_fee);
+            saleprice = saleprice==''? 0 : parseFloat(saleprice);
+            if (refund_fee >saleprice) {
+                msg("退款金额不能大于商品金额");
+                return false;
+            }
+            if (refund_fee >0 && $("#refund_no").val() =='') {
+                msg("您填写了退款金额，请先生成退款单");
+                return false;
+            }
+
+            top.layer.confirm("确定处理完成吗", function(index) {
+                ok = true;
+                top.layer.close(index);
+                $("#form_service").submit();
+            });
+            return false;
+        }
+        return true;
+    }
+
+
+    $(document).ready(function(){
+        $("#start_date,#end_date" ).datetimepicker({showTimepicker:false});
+
+        query_total();//累计销售金额
+
+        var myChart = echarts.init(document.getElementById('chart')),amountChart = echarts.init(document.getElementById('chart-amount'));
+
+        option = {
+            title: {
+                text: ''
+            },
+            tooltip: {
+                trigger: 'axis',
+                formatter:function(a) {
+                    return a[0].data;
+                }
+            },
+            legend: {
+                data:['销售数量']
+            },
+            grid: {
+                left: '3%',
+                right: '4%',
+                bottom: '3%',
+                containLabel: true
+            },
+            toolbox: {
+                x:"90%",
+                feature: {
+                    mark : {show: true},
+                    magicType : {show: true, type: ['line', 'bar']},
+                    saveAsImage: {}
+                }
+            },
+            xAxis: {
+                type: 'category',
+                boundaryGap: false,
+                data: []
+            },
+            yAxis: {
+                type: 'value'
+            },
+            series: [
+                {
+                    name:'销售数量',
+                    type:'line',
+                    stack: '总量',
+                    data:[]
+                }
+            ]
+        };
+
+        optionAmount = {
+            title: {
+                text: ''
+            },
+            tooltip: {
+                trigger: 'axis',
+                formatter:function(a) {
+                    return a[0].data+"单";
+                }
+            },
+            legend: {
+                data:['销售']
+            },
+            grid: {
+                left: '3%',
+                right: '4%',
+                bottom: '3%',
+                containLabel: true
+            },
+            toolbox: {
+                x:"90%",
+                feature: {
+                    mark : {show: true},
+                    magicType : {show: true, type: ['line', 'bar']},
+                    saveAsImage: {}
+                }
+            },
+            xAxis: {
+                type: 'category',
+                boundaryGap: false,
+                data: []
+            },
+            yAxis: {
+                type: 'value'
+            },
+            series: [
+                {
+                    name:'订单数',
+                    type:'line',
+                    stack: '总量',
+                    data:[]
+                }
+            ]
+        };
+
+        myChart.setOption(option);
+
+        query_salenum();//加载图表数据
+
+        $("#query").click(function() {
+            query_salenum();
+        });
+
+//ui-datepicker-close
+        $("#start_date,#end_date").change(function() {
+            query_salenum();
+        });
+
+        $(".btn-groupby label").click(function() {
+            $(".op-date").children().eq($(this).index()).show().siblings().hide();
+            query_salenum();
+            top.setIframeHeight();
+
+        });
+
+        $(".ladder-mod .it-list span").click(function() {
+            query_salenum();
+        });
+
+        function query_total() {
+            $.getJSON("admin.html?do=stat_sale", {act:"get_total"}, function(res) {
+                $("#total_amount").html(res.data.amount);
+                $("#total_num").html(res.data.num);
+            });
+        }
+
+        function query_salenum() {
+            var groupby = $("input[name='groupby']:checked").val(),
+                year =0,
+                month=0;
+            switch (groupby){
+                case 'year':
+                    year = $("#year-y").val();
+                    break;
+                case 'month':
+                    year = $("#month-y").val();
+                    month = $("#month-m").val();
+                    break;
+                case 'day':
+                    break;
+                default:
+                    break;
+            }
+
+            myChart.showLoading({text: '正在拼命读取数据...'});
+            $.getJSON("admin.html?do=stat_sale", {act:"get_sale",groupby:groupby,year:year,month:month, start_date:$("#start_date").val(), end_date:$("#end_date").val()}, function(res) {
+                myChart.hideLoading();
+                myChart.setOption({
+                    xAxis: {
+                        data: res.data.cat
+                    },
+                    series: [{
+                        name:'订单数',// 根据名字对应到相应的系列
+                        type:'line',
+                        stack: '总量',
+                        data: res.data.data
+                    }]
+                });
+            });
+        }
+
+    });
+
+</script>
 </html>

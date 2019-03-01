@@ -25,12 +25,18 @@
             <label class="form-label col-xs-4 col-sm-2">{{$pdt_attr->name}}：</label>
             <div class="formControls col-xs-8 col-sm-9">
                 @foreach($pdt_attr->arr as $key=>$p)
-                    <input name="attr[{{$pdt_attr->id}}][]" type="checkbox"  value="{{$p}}"
-                           @if(isset($pdt_id_attr)&& isset($arr[$pdt_attr->id]))
-                             @if(in_array($p,$arr[$pdt_attr->id]))
-                                checked
+                    <input  type="checkbox"  value="{{$p}}"
+                    @if(isset($pdt_id_attr)&& isset($arr[$pdt_attr->id]))
+                            @if(in_array($p,$arr[$pdt_attr->id]))
+                                @foreach($arr[$pdt_attr->id]  as $k => $v)
+                                    @if($v == $p)
+                                        checked name="attr[{{$pdt_attr->id}}][{{ $k }}]"
+                                    @endif
+                                @endforeach
+                            @else
+                                name="attr[{{$pdt_attr->id}}][{{$key}}]"
                             @endif
-                          @endif
+                    @endif
                     >
 
                     <label for="is_hot">{{$p}}</label>

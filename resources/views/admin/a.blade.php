@@ -1,4 +1,11 @@
 
+<input name="attr[{{$pdt_attr->id}}][{{ $key }}]" type="checkbox"  value="{{$p}}"
+       @if(isset($pdt_id_attr)&& isset($arr[$pdt_attr->id]))
+       @if(in_array($p,$arr[$pdt_attr->id]))
+       checked
+        @endif
+        @endif
+>
 
 
 @extends('admin.master')

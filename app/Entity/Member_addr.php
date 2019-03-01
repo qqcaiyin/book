@@ -28,9 +28,9 @@ class Member_addr extends Model
 	//获取指定id的地址信息
 	public static function getOneAddress($uid = 0, $addr_id = 0){
 		$res =0;
-		if($uid != 0 && $addr_id != 0 ){
+		if($uid != 0 ){
 			$res = Member_addr::where('member_id',$uid)
-				->where('id',$addr_id)
+				->where('is_default',1)
 				->first();
 			if(!$res){
 				$res = 0 ;

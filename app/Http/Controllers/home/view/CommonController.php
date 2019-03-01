@@ -6,7 +6,10 @@ namespace App\Http\Controllers\Home\View;
 
 use App\Entity\Cart;
 use App\Entity\Category;
+use App\Entity\Comment;
 use App\Entity\Keywords;
+use App\Entity\Member;
+use App\Entity\Member_quan;
 use App\Entity\Myfav;
 use App\Entity\Nav;
 use App\Entity\Pdt_id_attr;
@@ -14,6 +17,8 @@ use App\Entity\Pdt_sku;
 use App\Entity\Product;
 use App\Entity\Order;
 use App\Entity\Order_products;
+use App\Entity\Quan;
+use App\Entity\Quan_issue;
 use App\Models\M3Result;
 use Illuminate\Http\Request;
 use App\Http\Requests;
@@ -165,10 +170,14 @@ class CommonController extends Controller
 				$pdt_sku = $pdt_sku->toarray();
 				$product['price'] = $pdt_sku['sku_price'];
 				$product['spec'] = $pdt_sku['sku_attr'];
+				$product['num'] = $pdt_sku['sku_num'];
+
 				$pdt_id_attr = Pdt_id_attr::wherein('id',explode(',',$spec))->get()->toarray();
 				foreach ($pdt_id_attr as $value){
 					$product['spec_name'][] = $value['attr_value'];
 				}
+			}else{
+				$product['spec'] = '';
 			}
 		}
 		return  $product;
@@ -190,25 +199,25 @@ class CommonController extends Controller
 	}
 
 	//获取用户的订单
-	protected  function getMyOrder($uid=0 ,$num = 0 ,$where){
+	protected  function getMyOrder($uid=0 ,$num = 0 ,$where1= '', $where2 = ''){
 		//搜索条件
 		$sql = 1;
-		if($where !=''){
-			$sql .= ' and ' . $where;
+		if($where1 !=''){
+			$sql .= ' and ' . $where1;
 
 		}
 
 		$orderList =Order::orderby('order_info.id','desc')
 			->whereRaw($sql)
 			->where('is_del',0)
-			->where('member_id',$uid)
+			->where('order_info.member_id',$uid)
 			->leftjoin('member' ,'member.id','=','order_info.member_id')		//获取会员信息
 			->leftjoin('hat_province as hp' ,'hp.provinceID','=','order_info.province')//获取省份
 			->leftjoin('status_desc as sd' ,'sd.status_id','=','order_info.status')//获取订单状态
 			->leftjoin('hat_city as hc' ,'hc.cityID','=','order_info.city')			//获取城市
-			->select('order_info.*','member.nickname','hp.province','hc.city','sd.status_name','sd.status_desc' ,'sd.status_shipping')
+			->select('order_info.*','member.nickname','hp.province','hc.city','sd.status_name','sd.status_desc' ,'sd.status_shipping' ,'sd.next_stepdesc')
 			->paginate($num);
-
+//dd($orderList);
 		$orderData = array();
 		foreach ($orderList as $key=>$order){
 			//订单未支付，且超过24小时，取消订单
@@ -220,9 +229,15 @@ class CommonController extends Controller
 
 				}
 			}
-
 			//获取订单中的产品列表
+			//搜索条件
+			$sql = 1;
+			if($where2 !=''){
+				$sql .= ' and ' . $where2;
+
+			}
 			$orderProducts = Order_products::where('order_products.order_id',$order['id'])
+				->whereRaw($sql)
 				->leftjoin('product' ,'product.id','=','order_products.product_id')		//获取产品信息
 				->get()->toarray();
 
@@ -230,7 +245,16 @@ class CommonController extends Controller
 				$attrs = explode(',', $orderProduct['product_attr'] );
 
 				$res = Pdt_id_attr::wherein('id',$attrs)->select('attr_value')->get()->toarray();
-				$orderProduct['product_attr']=implode(',',array_column($res,'attr_value'));
+				//$orderProduct['spec_name']=implode(',',array_column($res,'attr_value'));
+				$orderProduct['spec_name']=array_column($res,'attr_value');
+				$comment = Comment::where('order_sn',$order['order_sn'])->where('pdt_id',$orderProduct['product_id'])->first();
+				if($comment){
+					$orderProduct['comment'] = $comment->content;
+					$orderProduct['star_num'] = $comment->star_num;
+				}else{
+					$orderProduct['comment'] = '';
+					$orderProduct['star_num'] = 0;
+				}
 
 			}
 			$orderData[$key] = $order;
@@ -238,16 +262,16 @@ class CommonController extends Controller
 		}
 
 		return  array('orderData'=>$orderData, 'orderList'=>$orderList) ;
-
-
 	}
 
 	//会员订单超时或者被取消时，被动 恢复库存
 	protected function recoverStock($uid = 0){
 		//获取会员的取消的订单 1:超时未支付 ，2：手动取消的订单
-		$orders = Order::where('member_id',$uid)->where('recovery_stock',0)->where('status',1)->orwhere('status',2)->get();
-		//dd($orders);
+		$orders = Order::where('member_id',$uid)->where('recovery_stock',0)->whereIn('status',[1,2])->get();
+
 		foreach ($orders as $order){
+			//更改订单状态
+			$res = Order::where('order_sn',$order->order_sn)->update(['status'=>2,'recovery_stock'=>1]);
 			//获取订单下的商品
 			$pdt = Order_products::where('order_id',$order->id)->get();
 			foreach ($pdt as $v){
@@ -257,11 +281,49 @@ class CommonController extends Controller
 				}
 				$res = Product::where('id',$v->product_id)->increment('num',$v->buy_number);
 			}
-
 		}
-
-
 	}
+
+	function getComments($gid){
+		//获取用户评价
+		$data = Comment::where('pdt_id', $gid)
+			->join('member' ,'member.id' ,'=','comment.member_id')
+			->select('comment.*','member.id as uid','member.nickname','member.avatar' )
+			->get()->toarray();
+
+		//好评 中评 差评 统计
+		$good =0;
+		$general = 0;
+		$bad = 0;
+		foreach ($data as &$v){
+			if($v['star_num'] == 1|| $v['star_num'] == 2){
+				$bad += 1;
+			}else if($v['star_num'] == 3){
+				$general +=1;
+			}else if($v['star_num'] == 4 || $v['star_num'] == 5){
+				$good +=1;
+			}
+			//
+			if($v['spec'] !=''){
+				$arrs= explode(',' , $v['spec']);
+				foreach ($arrs as $key=>$attr){
+					$res = Pdt_id_attr::where('id',$attr)->first();
+					$v['spec_name'][] = $res->attr_value;
+				}
+			}
+		}
+		$comments['good'] = $good;
+		$comments['general'] = $general;
+		$comments['bad'] = $bad;
+		$comments['sum'] = $bad + $general + $good;
+		$comments['good_bfb'] = $comments['sum'] >0 ?  round($good / $comments['sum'] *100  ) :0 ;
+		$comments['general_bfb'] = $comments['sum'] >0 ? round($general / $comments['sum'] *100  ):0 ;
+		$comments['bad_bfb'] = $comments['sum'] >0 ? round($bad / $comments['sum'] *100  ) : 0 ;
+		$comments['data'] =$data;
+
+		return  $comments;
+	}
+
 
 
 	/**
@@ -293,5 +355,120 @@ class CommonController extends Controller
 		}
 		return $res;
 	}
+
+	//获取物流信息   快递100 接口
+	public function  getShipInfo( $order_sn = ''){
+		//
+		$res = Order::where('order_sn',$order_sn)->first();
+		if(!$res){
+			return  $res ;
+		}
+		$post_data['customer'] = '8D8B997D95EEED206987D2A673A0F34C';
+		$key = 'DuKvlCyB7218';
+
+		$data = ([
+			'com'=>'debangwuliu',
+			'num'=>$res->shipping_sn,
+		]);
+		$post_data['param'] = json_encode($data);
+		$url = 'http://poll.kuaidi100.com/poll/query.do';
+		$post_data['sign'] = md5($post_data["param"].$key.$post_data["customer"]);
+		$post_data["sign"] = strtoupper($post_data["sign"]);
+		$o="";
+		foreach ($post_data as $k=>$v)
+		{
+			$o.= "$k=".urlencode($v)."&";		//默认UTF-8编码格式
+		}
+
+		$post_data=substr($o,0,-1);
+		$ch = curl_init();
+		curl_setopt($ch, CURLOPT_POST, 1);
+		curl_setopt($ch, CURLOPT_HEADER, 0);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+		curl_setopt($ch, CURLOPT_URL,$url);
+		curl_setopt($ch, CURLOPT_POSTFIELDS, $post_data);
+		$result = curl_exec($ch);
+		$data = str_replace("\"",'"',$result );
+		$data = json_decode($data,true);
+
+		return $data;
+	}
+
+	//确认收货
+	public function orderSign($order_sn =''){
+		$res =0;
+		if($order_sn != ''){
+			$res = Order::where('order_sn', $order_sn)->update(['status'=>6,'shipping_status' =>2 ,'confirm_time'=>time()]);
+		}
+		return $res;
+	}
+
+	//检测用户名是否已存在
+	//存在返回 0；
+	public function checkNickname($nickname='', $uid= 0){
+		$res = 0;
+		if($nickname !='' && $uid !=0){
+			$res = Member::where('id','!=',$uid)->where('nickname',$nickname)->first();
+			if($res){
+				$res = 1;
+			}else{
+				$res = 0;
+			}
+		}
+		return  $res;
+	}
+
+	//更新用户个人信息
+	public function updateUserInfo($uid = 0, $data ){
+		$res = 0;
+		if($uid){
+			$res = Member::where('id',$uid)->update($data);
+			if($res){
+				$res = 1;
+			}else{
+				$res = 0;
+			}
+		}
+		return $res ;
+	}
+
+	//更新用户的券，是否过期
+	public function updateMyQaun( $uid =0){
+		$res = 0;
+		if($uid){
+			$userQuan = Member_quan::where('member_quan.member_id', $uid)
+				->leftjoin('quan','quan.id','=','member_quan.quan_id')
+				->leftjoin('quan_issue as qi', 'qi.sn','=','member_quan.quan_sn')
+				->where('qi.is_used',0)
+				->where('qi.is_overdue',0)
+				->select('member_quan.*','quan.*')
+				->get()->toarray();
+
+			if( !$userQuan){
+				return $res;
+			}
+			foreach ($userQuan as $v){
+				if($v['end_time'] < time()){
+					//标记为过期
+					$res = Quan_issue::where('quan_id',$v['id'])->update(['is_overdue'=>1]);
+					if(!$res){
+						break;
+						return $res =0;
+					}
+				}
+
+			}
+			return $res =1;
+		}
+
+
+
+
+	}
+
+
+
+
+
 
 }

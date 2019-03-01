@@ -36,7 +36,7 @@ class Member extends Model
 			//待收货
 			$torecive = Order::where('member_id',$uid)->where('status',5)->count();
 			//待评价
-			$toeval = Order::where('member_id',$uid)->where('status',8)->count();
+			$toeval = Order::where('member_id',$uid)->where('status',6)->count();
 
 			$res['topay'] = $topay;
 			$res['tosend'] = $tosend;
@@ -53,6 +53,17 @@ class Member extends Model
 		if($uid && $data){
 			$res = Member::where('id',$uid)->update($data);
 			//dd($res);
+		}
+		return $res;
+	}
+
+	public static function getUserInfo($uid = 0){
+		$res = 0;
+		if($uid!=0){
+			$res = Member::find($uid);
+			if($res){
+				$res =$res->toarray();
+			}
 		}
 		return $res;
 	}

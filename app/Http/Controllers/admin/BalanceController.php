@@ -5,8 +5,10 @@ namespace App\Http\Controllers\Admin;
 
 use App\Entity\Balance_log;
 use App\Entity\Category;
+use App\Entity\Comment;
 use App\Entity\Member;
 use App\Entity\Member_grade;
+use App\Entity\Member_log;
 use App\Models\M3Result;
 use Illuminate\Http\Request;
 
@@ -25,13 +27,11 @@ class BalanceController extends Controller
 	public function toBalanceList()
 	{
 
-		$balance_logs = DB::table('balance_log')
-			->join('member', 'balance_log.member_id', '=', 'member.id')
-			->select('balance_log.*', 'member.nickname')
-			->orderBy('balance_log.id', 'des')
+		$balance_logs = Member_log::orderBy('member_log.id', 'desc')
+			->leftjoin('member', 'member_log.member_id', '=', 'member.id')
+			->select('member_log.*', 'member.nickname')
 			->paginate(15);
-
-
+//dd($balance_logs);
 		return view('admin/member/balance_list', compact('balance_logs'));
 	}
 
@@ -47,13 +47,13 @@ class BalanceController extends Controller
 		$starttime = strtotime(trim($data['starttime']));
 		$endtime = trim($data['endtime'])=='' ? time():( strtotime(trim($data['endtime']))+24*60*60);
 		//两表联查，
-		$balance_logs = DB::table('balance_log')
-			->join('member', 'balance_log.member_id', '=', 'member.id')
-			->select('balance_log.*', 'member.nickname')
+		$balance_logs = DB::table('member_log')
+			->join('member', 'member_log.member_id', '=', 'member.id')
+			->select('member_log.*', 'member.nickname')
 			->where('member.nickname',$nickname)
-			->whereBetween('balance_log.time',[$starttime,$endtime])
-			->orderBy('balance_log.id', 'desc')
-			->paginate(2);
+			->whereBetween('member_log.time',[$starttime,$endtime])
+			->orderBy('member_log.id', 'desc')
+			->paginate(15);
 		//
 		//使用appends把参数配置上，
 		//$request->input取得是url参数的值，把参数拼进去。再点击下一页的时候就链接跳转进入控制器处理，就可以获取到查询条件了。

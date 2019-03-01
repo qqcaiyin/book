@@ -6,6 +6,7 @@ use App\Entity\Cart;
 use App\Entity\Category;
 use App\Entity\Keywords;
 use App\Entity\Nav;
+use App\Entity\Order_products;
 use App\Entity\Pdt_content;
 use App\Entity\Pdt_id_attr;
 use App\Entity\Pdt_images;
@@ -32,6 +33,7 @@ class CartController extends CommonController
 //dd($cartList);
 		return  view('home/cart/cart' ,compact('cartList'));
 	}
+
 	/**
 	 * act :       addtocart 加入购物车
 	 *
@@ -121,7 +123,10 @@ class CartController extends CommonController
 						$count = $num;
 						$total = $total -$cartPdt['product_num'] + $num;
 					}
+				}else{
+					$count = $num;
 				}
+
 				$cartPdtInfo = Product::getProductsNum( $gid,$spec);
 				if($count > $cartPdtInfo['sku']['sku_num']){
 					$m3_result->status = 110;
@@ -129,7 +134,7 @@ class CartController extends CommonController
 					$m3_result->test =$cartPdtInfo;
 					return $m3_result->toJson();
 				}
-				if($flag == 1){
+				if($flag == 1){//购物车不包含此产品
 					$res = Cart::insertGetId([
 						'product_num'=>$num, 'product_id'=>$gid, 'member_id'=>$userId,'spec'=>$spec,
 					]);
@@ -139,7 +144,7 @@ class CartController extends CommonController
 						return $m3_result->toJson();
 					}
 					$total = $total +$num;
-				}else{
+				}else{//购物车已有此产品
 					$res = Cart::where('id',$cartPdt['id'])->update(['product_num'=>$count]);
 					if(!$res){
 						$m3_result->status = 10;
@@ -217,6 +222,49 @@ class CartController extends CommonController
 				$m3_result->message = "ok";
 				return $m3_result->toJson();
 			}
+		}else if($act == 'readd_cart' ){
+			//再次购买
+			$oid = isset($data['oid'])?  $data['oid'] : '';
+			$order_pdts = Order_products::where('order_id',$oid)->get();
+			//dd($order_pdts);
+			foreach ($order_pdts as $v){
+				//查找购物车是否已经有相同的产品
+				$cartPdt = Cart::where('member_id',$userId)
+					->where('product_id',$v->product_id)
+					->where('spec',$v->product_attr)
+					->first();
+				if($cartPdt){
+					// 购物车已经有同款产品
+					$num = $cartPdt->product_num +$v->buy_number;
+					$res = Cart::where('id' ,$cartPdt->id)->update(['product_num'=>$num]);
+				}else{
+					// 购物车没有同款产品
+					$res = Cart::insertGetId([
+						'product_sn' =>$v->product_sn,
+						'name' => $v->product_name,
+						'price' => $v->product_price,
+						'product_num' => $v->buy_number,
+						'product_id' => $v->product_id,
+						'member_id' =>$userId,
+						'spec' => $v->product_attr,
+					]);
+				}
+			}
+			return redirect('/cart');
+		}else if($act == 'to_order'){
+			//库存不足时提示修改购买数量
+			$cart_pdts = $this->getCart();
+			foreach ($cart_pdts['products'] as $key=> $v){
+				if($v['count'] > $v['cart_pdt']['num'] ){
+					$m3_result->status = 10;
+					$m3_result->message =  $v['cart_pdt']['name'] . '库存还有' . $v['cart_pdt']['num'] . " 件<br>请修改购买数量";
+					return $m3_result->toJson();
+				}
+			}
+			$m3_result->status = 0;
+			$m3_result->message = "ok";
+			$m3_result->data['url'] = "/order";
+			return $m3_result->toJson();
 		}
 	}
 

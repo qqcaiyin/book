@@ -99,7 +99,6 @@
                             layer.msg('服务端错误', {icon:2, time:2000});
                             return;
                         }
-                        data.status=0;
                         if(data.status != 0) {
                             layer.msg(data.message, {icon:2, time:2000});
                             return;

@@ -32,23 +32,49 @@
 //----------------------会员中心 --------需要login-check中间件--------------------------------------
 	Route::get('/user', 'home\view\MemberController@toUser');    //我的会员中心
 	Route::get('/myorder', 'home\view\MemberController@toMyOrder');//我的订单
-	Route::get('/details', 'home\view\MemberController@toMyOrderDetail');//我的订单
-
+	Route::get('/details', 'home\view\MemberController@toMyOrderDetail');//我的订单详情页
 	Route::get('/mycomment', 'home\view\MemberController@toMyComment');  //我的积分页面
+	Route::get('/comment', 'home\view\MemberController@toMyOrderComment');//我的订单详情页
+	Route::get('/myservice', 'home\view\MemberController@toMyService');//我的退换货页面
+	Route::get('/applyservice', 'home\view\MemberController@toApplyService');//我的退换货申请页面
+	Route::get('/servicedetails', 'home\view\MemberController@toServiceDetails');//我的退换货详情页面
+
 	Route::get('/fav', 'home\view\MemberController@toMyFav');  //我的收藏页面
 	Route::get('/mymoney', 'home\view\MemberController@toMyMoney');  //我的钱包页面
 	Route::get('/mypoint', 'home\view\MemberController@toMyPoint');  //我的积分页面
-
+	Route::get('/myquan', 'home\view\MemberController@toMyQuan');//我的退换货页面
+	Route::get('/userinfo', 'home\view\MemberController@toUserInfo');  //个人信息页面
+	Route::get('/updatepwd', 'home\view\MemberController@toUpdatePwd');  //我的地址页面
 	Route::get('/address', 'home\view\MemberController@toMyAddress');  //我的地址页面
 	Route::get('/address_add', 'home\view\MemberController@toMyAddressApi');  //添加地址
 
-
+//-----------------------------------------------------------
 
 	Route::get('/', 'home\view\IndexController@index');//主页
 	Route::get('/cate/', 'home\view\CatController@cateList');
-	Route::get('/product/{id}', 'home\view\ProductController@show'); //产品详情页面
+	Route::get('/miaosha', 'home\view\CatController@miaosha');//秒杀界面
+	Route::get('/quan', 'home\view\CatController@toQuan');//优惠券界面
+	Route::get('/product/{id}', 'home\view\ProductController@show');//产品详情页面
 	Route::get('/cart', 'home\view\CartController@toCart');//购物车详情页
 	Route::get('/order', 'home\view\OrderController@orderInfo');//订单页面
+	Route::get('/order/addr', 'home\view\OrderController@orderAddr');//添加地址页面
+
+	Route::group(['prefix' => 'service'],function() {
+		Route::post('/login', 'home\view\LoginController@homeLogin');//验证登录信息
+		Route::get('/out', 'home\view\LoginController@toOut');
+		Route::any('/reg', 'service\ValidateCodeControler@userApi'); //注册的处理
+
+		Route::any('/user', 'home\view\MemberController@userApi');
+		Route::any('/product', 'home\view\ProductController@serProduct');
+		Route::any('/cate', 'home\view\CatController@serCate');
+		Route::any('/cart', 'home\view\CartController@serCart');
+		Route::any('/order', 'home\view\OrderController@serOrder');
+
+		Route::post('/upload/{type}', 'Service\UploadController@uploadFile');
+	});
+
+
+
 
 
 Route::group(['prefix' => 'home' ],function(){
@@ -70,16 +96,7 @@ Route::group(['prefix' => 'home' ],function(){
 
 
 });
-Route::group(['prefix' => 'service'],function() {
-	Route::post('/login', 'home\view\LoginController@homeLogin');//验证登录信息
-	Route::get('/out', 'home\view\LoginController@toOut');
-	Route::any('/reg', 'service\ValidateCodeControler@userApi'); //注册的处理
 
-	Route::any('/user', 'home\view\MemberController@userApi');
-	Route::any('/product', 'home\view\ProductController@serProduct');
-	Route::any('/cart', 'home\view\CartController@serCart');
-	Route::any('/order', 'home\view\OrderController@serOrder');
-});
 
 
 
@@ -113,7 +130,7 @@ Route::group(['middleware' => 'check.login'],function() {
 	Route::get('/order_list/', 'view\OrderController@toOrderList');
 });
 
-	Route::post('/service/upload/{type}', 'Service\UploadController@uploadFile');
+
 
 
 //后台
@@ -156,7 +173,7 @@ Route::group([ 'middleware' => 'check.login','prefix' => 'admin'],function() {
 	Route::post('/service/product/add', 'admin\ProductController@productAdd');
 	Route::post('/service/product/edit', 'admin\ProductController@productEdit');
 	Route::post('/service/product/sku/add', 'admin\ProductController@getSku');
-//----------------------产品类型属性管理------------------------------------------------
+//----------------------产品类型属性管理-------------------------------------------
 	Route::get('/type', 'admin\ProductTypeController@toTypeList');
 	Route::get('/type_add', 'admin\ProductTypeController@toTypeAdd');
 	Route::get('/type_edit/{id}', 'admin\ProductTypeController@toTypeEdit');
@@ -164,13 +181,32 @@ Route::group([ 'middleware' => 'check.login','prefix' => 'admin'],function() {
 	Route::post('/service/type/add', 'admin\ProductTypeController@typeAdd');
 	Route::post('/service/type/edit', 'admin\ProductTypeController@typeEdit');
 	Route::any('/service/type/del', 'admin\ProductTypeController@typeDel');
+
+//----------------------营销管理------------------------------------------------
+	Route::get('/market/skipe', 'admin\MarketController@toSkipeList');
+	Route::get('/market/skipe_add', 'admin\MarketController@toSkipeAdd');
+	Route::get('/market/skipe_edit', 'admin\MarketController@toSkipeEdit');
+
+	Route::get('/market/distrib_add', 'admin\MarketController@toDistribAdd');
+	Route::get('/pdt', 'admin\MarketController@pdtList');
+
+	Route::get('/market/quan_list', 'admin\MarketController@toQuanList');
+	Route::get('/market/quan_add', 'admin\MarketController@toQuanAdd');
+	Route::get('/market/quan_edit', 'admin\MarketController@toQuanEdit');
+	Route::get('/market/quan_issue', 'admin\MarketController@toQuanIssue');
+
+	Route::get('/service/market', 'admin\MarketController@serMarket');
+
+
 //----------------------会员管理------------------------------------------------
 	Route::get('/member', 'admin\MemberController@toMember');
 	Route::get('/member/member_show/{id}', 'admin\MemberController@memberShow');
 	Route::get('/member_add', 'admin\MemberController@toMemberAdd');
 	Route::get('/grade', 'admin\MemberController@toMemberGrade');        //会员等级界面
 	Route::get('/member_money/{id}', 'admin\MemberController@toMoney');
+	Route::get('/comments', 'admin\MemberController@toComments'); //用户留言管理
 
+	Route::post('/service/comments', 'admin\MemberController@serComments');  //
 	Route::post('/service/member/grade', 'admin\MemberController@gradeChangeValue');
 	Route::post('/service/member/enable', 'admin\MemberController@memberEnable');
 	Route::post('/service/member/del', 'admin\MemberController@memberDel');
@@ -200,14 +236,26 @@ Route::group([ 'middleware' => 'check.login','prefix' => 'admin'],function() {
 	Route::post('/service/admin/add', 'admin\AdminController@adminAdd');
 //----------------------订单管理------------------------------------------------
 	Route::get('/order', 'admin\OrderController@toOrderList');//订单列表界面
+	Route::get('/return_list', 'admin\OrderController@toReturnList');//订单退货列表界面
+	Route::get('/servicedetails', 'admin\OrderController@toReturnDetails');//订单退货详情界面
+
 	Route::get('/order_add', 'admin\OrderController@toOrderAdd');//订单列表界面
 	Route::get('/order/info', 'admin\OrderController@toOrderInfo');//订单详情界面
 	Route::get('/order/print', 'admin\OrderController@toOrderPrint');//订单打印界面
+
+	Route::get('/service/order', 'admin\OrderController@orderSer');//取消订单
 
 	Route::get('/service/order/cancel', 'admin\OrderController@orderCancel');//取消订单
 	Route::get('/service/order/del', 'admin\OrderController@orderDel');//删除订单
 //----------------------配送方式------------------------------------------------
 	Route::get('/sys/ship', 'admin\ShippingController@toShipList');//订单列表界面
+
+//----------------------统计------------------------------------------------
+	Route::get('/charts/sale_total', 'admin\SaleCartsController@toSaleTotal');//订单列表界面
+
+
+	Route::get('/service/stat_sale', 'admin\SaleCartsController@stat_sale');//订单列表界面
+
 
 	//Route::get('/index', function () {
 	//	return view('admin.index');

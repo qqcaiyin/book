@@ -29,11 +29,11 @@
 </style>
 
 @section('content')
-    <nav class="breadcrumb"><i class="Hui-iconfont">&#xe67f;</i> 产品 <span class="c-gray en">/</span> 产品管理 <span class="c-gray en">/</span> 产品列表 <a class="btn btn-success radius r" style="line-height:1.6em;margin-top:3px" href="javascript:location.replace(location.href);" title="刷新" ><i class="Hui-iconfont">&#xe68f;</i></a></nav>
-<div class="page-container">
-    <div class="cl pd-5  mt-20" >
+    <nav class="breadcrumb" ><i class="Hui-iconfont">&#xe67f;</i> 产品 <span class="c-gray en">/</span> 产品管理 <span class="c-gray en">/</span> 产品列表 <a class="btn btn-success radius r" style="line-height:1.6em;margin-top:3px" href="javascript:location.replace(location.href);" title="刷新" ><i class="Hui-iconfont">&#xe68f;</i></a></nav>
+<div class="page-container" style="  padding-top: 0px;">
+    <div class="cl pd-5  mt-20"  style=" margin-top:  0px;" >
         <span class="l">
-            <a class="btn btn-primary radius" onclick="layer_product('产品管理/添加产品','/admin/product_add')" href="javascript:;"><i class="Hui-iconfont">&#xe604;</i> 添加产品</a>
+            <a class="btn btn-primary radius"  onclick="layer_product('产品管理/添加产品','/admin/product_add')" href="javascript:;"><i class="Hui-iconfont">&#xe604;</i> 添加产品</a>
          <a class="btn btn-primary radius" onclick="checkbox_del(' > 删除','/admin/product_add')" href="javascript:;"><i class="Hui-iconfont">&#xe60b;</i>删除</a>
             <a class="btn btn-primary radius" href="{{ url('admin/product/recycle') }}"><i class="Hui-iconfont">&#xe609;</i>回收站</a>
         </span>

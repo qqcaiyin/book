@@ -8,6 +8,7 @@ use App\Entity\Keywords;
 use App\Entity\Member;
 use App\Entity\Member_addr;
 use App\Entity\Member_log;
+use App\Entity\Member_quan;
 use App\Entity\Nav;
 use App\Entity\Order;
 use App\Entity\Order_products;
@@ -16,6 +17,7 @@ use App\Entity\Pdt_id_attr;
 use App\Entity\Pdt_images;
 use App\Entity\Pdt_sku;
 use App\Entity\Product;
+use App\Entity\Quan_issue;
 use App\Entity\Shipping;
 use App\Models\M3Result;
 use http\Env\Response;
@@ -72,6 +74,7 @@ class OrderController extends CommonController
 	 * @return
 	 */
 	public function orderInfo(){
+
 		$m3_result = new M3Result;
 		//判断有没有收货人信息
 		$id = Session::get('memberId');
@@ -105,7 +108,18 @@ class OrderController extends CommonController
 		$sumAndShip = $is_default->price + $amount ;
 		//订单金额 存到session
 		Session::put('products_amount',$amount);
-		return  Response()->view('home/order/orderinfo',compact('user','cartList','amount','memberAddress','shiplist','sumAndShip'))->withCookie('orderAddress',$memberAddress);
+
+		$id = Session::get('memberId');
+		$data = Member_addr::getAddress($id);
+		//dd($data);
+		//地址最大条数 6条
+		$count = 1;
+		if(count($data)>=4){
+			$count = 0;
+		}
+
+
+		return  Response()->view('home/order/orderinfo',compact('user','cartList','amount','memberAddress','shiplist','sumAndShip' ,'data','count'))->withCookie('orderAddress',$memberAddress);
 	}
 
 
@@ -271,7 +285,7 @@ class OrderController extends CommonController
 		$data = $this->inputCheck($request->all());
 		$act = isset($data['act'])? $data['act']:'';
 		if($act == 'add_order'){
-			//添加订单
+//添加订单
 			$user_id = $this->checkLogin();
 			if($user_id == 0){
 				//用户需要登陆
@@ -282,15 +296,26 @@ class OrderController extends CommonController
 			$cneeid = isset($data['cneeid'])? intval($data['cneeid']) : 0;
 			$shipid = isset($data['shipid'])? intval($data['shipid']) : 0;
 			$balance = isset($data['balance'])? abs(floatval($data['balance'])) : 0;
+			$parvalue = isset($data['parvalue'])? abs(floatval($data['parvalue'])) : 0;
 			$point = isset($data['point'])? abs(intval($data['point'])) : 0;
+			$quan_sn = isset($data['quan_sn'])? $data['quan_sn'] : '';
 			$paypwd = isset($data['paypwd'])? $data['paypwd'] : '';
 			$message = isset($data['user_msg'])? $data['user_msg'] : '';
 
+			//判断优惠券是否过期
+			$this->updateMyQaun();
+			$res =Member_quan::getQuanState($user_id,$quan_sn);
+			if(!$res){
+				$m3_result->message='当前优惠券不能使用';
+				return $m3_result->toJson();
+			}
+			$qid = $res['quan_id'];
 			//获取此用户购物车所有产品
 			$cart = $this->getCart();
 			$cartList =array();
 			$amount = 0;
 			$update_num = array();
+
 			foreach($cart['products'] as  $key=>$v){
 				if($v['is_checked'] == 1){
 					if($v['cart_pdt']['is_show'] == 0){
@@ -302,7 +327,7 @@ class OrderController extends CommonController
 						return $m3_result->toJson();
 					}
 
-					if($v['cart_pdt']['spec'] !== ''){
+					if(  $v['cart_pdt']['spec'] !== ''){
 						$update_num[$key]['spec'] = $v['cart_pdt']['spec'];
 					}else{
 						$update_num[$key]['spec'] = '';
@@ -326,8 +351,8 @@ class OrderController extends CommonController
 			$user = Member::getUser($user_id);
 			$consignee = Member_addr::getOneAddress($user_id,$cneeid );
 			$shipping =Shipping::getShipping($shipid);
-			if(count($consignee) == 0){
-				$m3_result->message='请先填写首件地址';
+			if(!$consignee){
+				$m3_result->message='请先填写收件地址';
 				return $m3_result->toJson();
 			}
 
@@ -346,7 +371,7 @@ class OrderController extends CommonController
 				}
 			}
 
-			$pay_amount = $balance + $point/100  ;       //使用余额和积分等支付的金额
+			$pay_amount = $balance + $point/100 + $parvalue  ;       //使用余额和积分等支付的金额
 			$order_amount = $amount + $shipping['price'];
 			$data = array(
 				'order_sn' => $this->orderCreateSn(),//获取订单编号
@@ -354,6 +379,7 @@ class OrderController extends CommonController
 				'products_amount' => $amount ,//应付总金额
 				'order_amount' => $order_amount, //订单金额
 				'money_paid' => $pay_amount,  //已支付金额
+				'quan_amount' =>$parvalue,
 				'balance_amount' => $balance , //余额支付的部分
 				'point_amount' => $point/100,  //积分支付的部分
 				'message' => $message, 					//订单留言
@@ -384,9 +410,14 @@ class OrderController extends CommonController
 				$data['pay_id'] = 0;
 				$data['pay_time'] = time();
 			}
+
+			//开启事务
+			DB::beginTransaction();
+
 			//写入订单表  -
 			$order_id = Order::insertGetId($data);
 			if(!$order_id){
+				DB::rollBack();
 				$m3_result->message="网络异常，请刷新页面，重新提交";
 				return $m3_result->toJson();
 			}
@@ -403,6 +434,7 @@ class OrderController extends CommonController
 				);
 				$res = Order_products::insertGetId($order_pdt);
 				if(!$res){
+					DB::rollBack();
 					$m3_result->message="网络异常，请刷新页面，重新提交";
 					return $m3_result->toJson();
 				}
@@ -436,10 +468,18 @@ class OrderController extends CommonController
 			}
 			//下单成功,清空购物车
 			Cart::clearCart($user_id);
-
-			$m3_result->status = 0;
-			$m3_result->message="ok";
-			return $m3_result->toJson();
+			//更新优惠券状态
+			$resQuan = Member_quan::updateQuanState($user_id,$qid,$quan_sn);
+			if($resQuan){
+				DB::commit();
+				$m3_result->status = 0;
+				$m3_result->message = "订单完成";
+				return $m3_result->toJson();
+			}else{
+				DB::rollBack();
+				$m3_result->message="网络异常，请刷新页面，重新提交";
+				return $m3_result->toJson();
+			}
 
 		}
 		if($act == 'order_cancel'){
@@ -463,15 +503,84 @@ class OrderController extends CommonController
 				$m3_result->status = 10;
 				$m3_result->message = '订单取消失败';
 			}
-
 			return $m3_result->toJson();
+		}else if($act == 'get_myquan'){
+//获取我的当前订单可用的优惠券
+			//dd($data);
+			//获取优惠券需要先登陆
+			$uid = $this->checkLogin();
+			if($uid == 0){
+				$m3_result->status = 20;
+				$m3_result->message='请先登录';
+				return $m3_result->toJson();
+			}
+			//获取订单总价和产品id
+			$amount = isset($data['amount']) ? intval($data['amount']) : 0;
+			$good_ids = isset($data['good_ids']) ? trim($data['good_ids']) :'';
+			$gids = explode(',',$good_ids);
+
+			$where = 1;
+			$where .=  '  and qi.is_used=0  and qi.is_overdue=0 and quan.amount_reached <=' . $amount;
+
+			$this->updateMyQaun($uid);
+			$userQuan = Member_quan::getUserQuan($uid,$where);
+			if($userQuan){
+				$m3_result->status = 0;
+				$m3_result->message='ok';
+				$m3_result->data=$userQuan;
+				return $m3_result->toJson();
+			}else{
+				$m3_result->status = 20;
+				$m3_result->message='获取失败';
+				return $m3_result->toJson();
+			}
+
+
+
+
 
 		}
-
-
-
-
-
 	}
 
 }
+/*
+$data =[
+	[
+		'id' =>1,
+		'name'=>'红',
+		'prop'=>[
+			'pid' =>1,
+			'pname'=>'颜色'
+		]],
+	[
+		'id' =>2,
+		'name'=>'黄',
+		'prop'=>[
+			'pid' =>1,
+			'pname'=>'颜色'
+		]],
+	[
+		'id' =>3,
+		'name'=>'大',
+		'prop'=>[
+			'pid' =>2,
+			'pname'=>'尺寸'
+		]],
+
+];
+
+//	dd($data);
+$arr= array();
+foreach($data   as $key => $v){
+
+	$arr[$v['prop']['pid']]['pid'] = $v['prop']['pid'];
+	$arr[$v['prop']['pid']]['pname'] = $v['prop']['pname'];
+	$arr[$v['prop']['pid']]['list'][$key]['id'] = $v['id'];
+	$arr[$v['prop']['pid']]['list'][$key]['name'] = $v['name'];
+
+}
+
+
+
+dd($arr);
+*/

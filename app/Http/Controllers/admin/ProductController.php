@@ -185,10 +185,10 @@ class ProductController extends Controller
 		   $pdt_id_attr = Pdt_id_attr::where('product_id',$product_id)->get();
 		   foreach ($pdt_id_attr as $key =>$p){
 		   	if($p)
-			   $arr[$p->attr_id][]=$p->attr_value;
+			   $arr[$p->attr_id][$p->id]=$p->attr_value;
 
 		   }
-		 //  dd($arr);
+		   dd($arr);
 		   return  view('admin/product/attributes')->with('pdt_attrs',$pdt_attrs)
 			   ->with('pdt_id_attr',$pdt_id_attr)
 			   ->with('arr',$arr);
@@ -407,6 +407,8 @@ dd($product);
 		$m3_result->status = 0;
 		$m3_result->message = "添加成功";
 
+		$data = $request->all();
+dd($data);
 		//获取产品id
 		$product_id = $request->input('pid');
 		//获取产品表的数据
@@ -414,10 +416,11 @@ dd($product);
 		//时间转化为时间戳
 		$product['start_date'] = strtotime(trim($product['start_date']));
 		$product['end_date'] = strtotime(trim($product['end_date']));
-
 //dd($product);
 		//更新数据，把那个返回id
 		$res = Product::where('id',$product_id)->update($product);
+
+		//删除旧的图片
 
 		//读取添加的图片路径，写入pdt_images表中
 		$imgs = $request->input('img');

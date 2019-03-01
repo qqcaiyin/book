@@ -254,7 +254,6 @@ class UploadController extends Controller
 		$m3_result = new M3Result;
 
 		$filePath = $request->input('src');
-
 		$res = file_exists('.' . $filePath);
 		if($res){
 			$resDel = unlink('.' . $filePath);
@@ -265,8 +264,11 @@ class UploadController extends Controller
 				$m3_result->status = 10;
 				$m3_result->message = "删除失败";
 			}
+		}else{
+			$m3_result->status = 0;
+			$m3_result->message = "图片不在";
 		}
-
+		$m3_result->data['uri'] ='/images/jia.png';
 		return $m3_result->toJson();
 
 	}

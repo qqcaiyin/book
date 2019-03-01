@@ -212,7 +212,7 @@
                 @endif
             </div>
             <div class="des_price">
-                本店价格：<b  @if($productInfo->is_sale==1)   style="text-decoration: line-through ; color:#ddd;" @endif> ￥{{$productInfo->price}}</b><br />
+                本店价格：<b  @if($productInfo->is_sale==1)   style="text-decoration: line-through ; color:#ddd;" @endif> ￥<span id="pdt_price">{{$productInfo->price}} </span></b><br />
                 商品库存：<span id="pdt_num">{{$productInfo->num}}</span>
             </div>
             <!--规格--->
@@ -269,101 +269,105 @@
             <div id="ct">
             <!--商品详情-->
             <div class="des_con" id="p_attribute">
+                <div style="width:100%; height:300px;  ">
+                </div>
+                <div style="width:100%;  ">
 
-                <table border="0" align="center" style="width:100%; font-family:'宋体'; margin:10px auto;" cellspacing="0" cellpadding="0">
-                    @foreach($specList as $value)
-                        <tr>
-                            <td>{{$value->name}}：{{$value->attr_value}}</td>
-                        </tr>
 
-                    @endforeach
-                </table>
+                    {!! $productInfo->content->content !!}
+
+                </div>
             </div>
 
             <!--商品评论-->
-            <div class="des_border" id="p_comment" style=" display: none;">
+            <div class="des_border" id="p_comment" style=" display: none; background-color: #fff;">
 
                 <table border="0" class="jud_tab" cellspacing="0" cellpadding="0">
                     <tr>
                         <td width="175" class="jud_per">
-                            <p>80.0%</p>好评度
+                            <p>{{ $comments['good_bfb'] }}%</p>好评度
                         </td>
                         <td width="300">
-                            <table border="0" style="width:100%;" cellspacing="0" cellpadding="0">
-                                <tr>
-                                    <td width="90">好评<font color="#999999">（80%）</font></td>
-                                    <td><img src="/home/images/pl.gif" align="absmiddle" /></td>
-                                </tr>
-                                <tr>
-                                    <td>中评<font color="#999999">（20%）</font></td>
-                                    <td><img src="/home/images/pl.gif" align="absmiddle" /></td>
-                                </tr>
-                                <tr>
-                                    <td>差评<font color="#999999">（0%）</font></td>
-                                    <td><img src="/home/images/pl.gif" align="absmiddle" /></td>
-                                </tr>
-                            </table>
+                            好评<span style="color:#999999;">（{{ $comments['good_bfb'] }}%)</span>
+                            <i style=" width:{{ $comments['good_bfb'] }}%;">  </i>
                         </td>
-                        <td width="185" class="jud_bg">
-                            购买过雅诗兰黛第六代特润精华露50ml的顾客，在收到商品才可以对该商品发表评论
+                        <td width="300">
+                            中评<span style="color:#999999;">（{{$comments['general_bfb']}}%）</span>
+                            <i  style=" width:{{$comments['general_bfb']}}%;">  </i>
                         </td>
-                        <td class="jud_bg">您可对已购买商品进行评价<br /><a href="#"><img src="/home/images/btn_jud.gif" /></a></td>
+                        <td width="300">
+                            差评<span style="color:#999999;">（{{$comments['bad_bfb']}}%）</span>
+                            <i style=" width:{{$comments['bad_bfb']}}%;">  </i>
+                        </td>
                     </tr>
+
                 </table>
 
+                <div  class="pdt-comment" >
+                    <ul>
+                        <li class="current">全部评论(<em>{{$comments['sum']}}</em> )</li>
+                        <li>好评(<em>{{$comments['good']}}</em> )</li>
+                        <li>中评(<em>{{$comments['general']}}</em> )</li>
+                        <li>差评(<em>{{$comments['bad']}}</em> )</li>
+                    </ul>
+                </div>
+                <div class="comment-list">
+                    <ul>
+                        @if( !empty($comments['data']))
+                        @foreach($comments['data'] as $v)
+                            <li  id="{{$v['id']}}">
+                                <div class="user">
+                                    <div class="user-pic">
+                                        <img  @if($v['is_anony']==1) src="{{url('/images/niming.png')}}"    @else src="{{url($v['avatar'])}}"   @endif>
+                                    </div>
+                                    <div class="user-name">
+                                        <p>@if($v['is_anony']==1) 匿名  @else {{$v['nickname']}}  @endif</p>
+                                    </div>
+                                    <div class="user-date">
+                                        <p>{{ date('Y-m-d H:i:s',$v['time'])}}</p>
+                                    </div>
+                                </div>
+                                <div class="content">
+                                    <div class="pdt_spec">
+                                        <div style="float: left;">
+                                            @if($v['spec'] != '')
+                                                @foreach($v['spec_name'] as $spec)
+                                                  <span style="color:#007cc3;">[{{$spec}}] </span>
+                                                @endforeach
+                                            @endif
+                                        </div>
+                                        <div style="float: right;">
+                                            @for($i= 0 ;$i < $v['star_num']; $i++ )
+                                                 <img src="{{ url('/images/star-red.png ') }} " >
+                                            @endfor
+                                        </div>
 
-
-                <table border="0" class="jud_list" style="width:100%; margin-top:30px;" cellspacing="0" cellpadding="0">
-                    <tr valign="top">
-                        <td width="160"><img src="/home/images/peo1.jpg" width="20" height="20" align="absmiddle" />&nbsp;向死而生</td>
-                        <td width="180">
-                            颜色分类：<font color="#999999">粉色</font> <br />
-                            型号：<font color="#999999">50ml</font>
-                        </td>
-                        <td>
-                            产品很好，香味很喜欢，必须给赞。 <br />
-                            <font color="#999999">2015-09-24</font>
-                        </td>
-                    </tr>
-                    <tr valign="top">
-                        <td width="160"><img src="/home/images/peo2.jpg" width="20" height="20" align="absmiddle" />&nbsp;就是这么想的</td>
-                        <td width="180">
-                            颜色分类：<font color="#999999">粉色</font> <br />
-                            型号：<font color="#999999">50ml</font>
-                        </td>
-                        <td>
-                            送朋友，她很喜欢，大爱。 <br />
-                            <font color="#999999">2015-09-24</font>
-                        </td>
-                    </tr>
-                    <tr valign="top">
-                        <td width="160"><img src="/home/images/peo3.jpg" width="20" height="20" align="absmiddle" />&nbsp;墨镜墨镜</td>
-                        <td width="180">
-                            颜色分类：<font color="#999999">粉色</font> <br />
-                            型号：<font color="#999999">50ml</font>
-                        </td>
-                        <td>
-                            大家都说不错<br />
-                            <font color="#999999">2015-09-24</font>
-                        </td>
-                    </tr>
-                    <tr valign="top">
-                        <td width="160"><img src="/home/images/peo4.jpg" width="20" height="20" align="absmiddle" />&nbsp;那*****洋 <br /><font color="#999999">（匿名用户）</font></td>
-                        <td width="180">
-                            颜色分类：<font color="#999999">粉色</font> <br />
-                            型号：<font color="#999999">50ml</font>
-                        </td>
-                        <td>
-                            下次还会来买，推荐。<br />
-                            <font color="#999999">2015-09-24</font>
-                        </td>
-                    </tr>
-                </table>
-
-
-
-                <div class="pages">
-                    <a href="#" class="p_pre">上一页</a><a href="#" class="cur">1</a><a href="#">2</a><a href="#">3</a>...<a href="#">20</a><a href="#" class="p_pre">下一页</a>
+                                    </div>
+                                    <div style="margin-top: 20px; float: left; width:100%;">
+                                        {{$v['content']}}
+                                    </div>
+                                    <div class="receive">
+                                        <a href="javascript:;" class="rec"  onclick=" getReplay(this);" >回复(<em>{{$v['comment_msg_num']}}</em>)</a>
+                                        <div class="rec-box" style=" display: none;" >
+                                            <div class="inner">
+                                                <textarea  class="txt"  placeholder="回复 {{ $v['nickname']}}：" ></textarea>
+                                            </div>
+                                            <p>
+                                                <input type="submit" class="submita" onclick="reply(this);" data-ptype="0"  data-pid="{{$v['id']}}" value="提交">
+                                            </p>
+                                        </div>
+                                        <div class="replylist " >
+                                        </div>
+                                    </div>
+                                </div>
+                            </li>
+                        @endforeach
+                            @else
+                            <li style="text-align: center;">
+                                <p>暂无评价</p>
+                            </li>
+                        @endif
+                    </ul>
                 </div>
 
             </div>
@@ -372,100 +376,6 @@
         </div>
     </div>
 
-
-    <!--Begin 弹出层-收藏成功 Begin-->
-    <div id="fade" class="black_overlay"></div>
-    <div id="MyDiv" class="white_content">
-        <div class="white_d">
-            <div class="notice_t">
-                <span class="fr" style="margin-top:10px; cursor:pointer;" onclick="CloseDiv('MyDiv','fade')"><img src="/home/images/close.gif" /></span>
-            </div>
-            <div class="notice_c">
-
-                <table border="0" align="center"  cellspacing="0" cellpadding="0">
-                    <tr valign="top">
-                        <td width="40"><img src="/home/images/suc.png" /></td>
-                        <td>
-                            <span id="  " style="color:#3e3e3e; font-size:18px; font-weight:bold;">您已成功收藏该商品</span><br />
-                            <a href="#">查看我的关注 >></a>
-                        </td>
-                    </tr>
-                    <tr height="50" valign="bottom">
-                        <td>&nbsp;</td>
-                        <td><a href="#" class="b_sure">确定</a></td>
-                    </tr>
-                </table>
-
-            </div>
-        </div>
-    </div>
-    <!--End 弹出层-收藏成功 End-->
-
-    <!--Begin 弹出层-登陆层 Begin-->
-    <div id="fade_login" class="black_overlay"></div>
-    <div id="MyDiv_login" class="white_content">
-        <div class="white_d">
-            <div class="notice_t">
-                <span class="fr" style="margin-top:10px; cursor:pointer;" onclick="CloseDiv('MyDiv_login','fade_login')"><img src="/home/images/close.gif" /></span>
-            </div>
-            <div class="notice_c">
-                    <table border="0" align="center"  cellspacing="1" cellpadding="1">
-                        <input type="hidden" name="_token" value="{{ csrf_token() }}" />
-                        <tr valign="top">
-                            <td width="80">用户名：</td>
-                            <td>
-                                <input  type="text" name="username"  autocomplete="off"    style="  height:25px; outline:none; border: 1px solid #ddd; background-color: white"  >
-                            </td>
-                        </tr>
-                        <tr valign="top">
-                            <td width="80">密码：</td>
-                            <td>
-
-                                <input  type="password" name="password"   autocomplete="off"   style="  height:25px; outline:none; border: 1px solid #ddd; background-color: white"  >
-                            </td>
-                        </tr>
-                        <tr height="50" valign="bottom">
-                            <td>&nbsp;</td>
-                            <td><a href="javascript:;"  id="lg"  onclick="homeLogin();"  class="b_sure">确定</a></td>
-                        </tr>
-                        <tr>
-                            <td></td>
-                            <td><span   id="er"   style=" collapse: red;">    </span></td>
-                        </tr>
-                    </table>
-            </div>
-        </div>
-    </div>
-    <!--End 弹出层-登陆层 End-->
-
-
-    <!--Begin 弹出层-加入购物车 Begin-->
-    <div id="fade1" class="black_overlay"></div>
-    <div id="MyDiv1" class="white_content">
-        <div class="white_d">
-            <div class="notice_t">
-                <span class="fr" style="margin-top:10px; cursor:pointer;" onclick="CloseDiv_1('MyDiv1','fade1')"><img src="/home/images/close.gif" /></span>
-            </div>
-            <div class="notice_c">
-
-                <table border="0" align="center"  cellspacing="0" cellpadding="0">
-                    <tr valign="top">
-                        <td width="40"><img src="/home/images/suc.png" /></td>
-                        <td>
-                            <span id="msg" style="color:#3e3e3e; font-size:18px; font-weight:bold;"></span><br />
-                            <span id="data" style="color:#3e3e3e; font-size:12px; "></span>
-                        </td>
-                    </tr>
-                    <tr height="50" valign="bottom">
-                        <td>&nbsp;</td>
-                        <td><a href="{{url('/home/cart/index')}}" class="b_sure">去购物车结算</a><a href="#" class="b_buy">继续购物</a></td>
-                    </tr>
-                </table>
-
-            </div>
-        </div>
-    </div>
-    <!--End 弹出层-加入购物车 End-->
 <!--Begin Footer Begin -->
 <div class="b_btm_bg b_btm_c">
     <div class="b_btm">
@@ -592,8 +502,9 @@
             var num =$('.n_ipt').val();
             $.get(url,{ act:'sku_num','gid':gid,'spec':spec},function(res){
                 if(res.status == 0){
-                    //处理成功
-                    $('#pdt_num').text(res.data);
+                    //处理成功alert
+                    $('#pdt_num').text(res.data.num);
+                    $('#pdt_price').text(res.data.price);
                 }else{
                     //
                 }
@@ -738,6 +649,78 @@
        });
      }
 
+//获取回复
+    function getReplay(t){
+         if($(t).siblings('.replylist').hasClass('loaded') == false ){
+             var cid =$(t).parents('li').attr('id');
+             $.get('/service/user',{act:'get_comment_reply',cid:cid},function (res) {
+                 if(res.status == 0){
+                     var html='';
+                     $.each(res.data, function(k,v){
+                         html += '<div class="receive"><div class="content"><p><span class="user-name">'+ v.uname +' 回复 '+ v.reply_name+'：</span><span>'+ v.content+'</span><span class=" date">'+ v.add_time +'</span>  </p><a style="float:left; width:100%;"  href="javascript:void(0);" onclick="showReplayBox(this);" class="receivea">回复</a>';
+                         html += '';
+                         html += '<div class="rec-box" style="width:100%; margin-top: 2px; " ><div class="inner"><textarea placeholder="回复 '+ v.uname +':" class="txt"  maxlength="120"></textarea></div>';
+                         html += '<p><input type="submit" data-pid="'+v.id+'" data-ptype="1" value="提交" class="submita" onclick="reply(this);"/> </p></div></div></div>';
+                         html += '</div>';
+                     });
+                     $(t).siblings(".replylist").append(html).addClass("loaded");
+                    // $(t).siblings(".replylist").addClass("loaded");
+                 }
+
+             },'json');
+
+         }
+
+         showReplayBox(t);
+    }
+
+    function showReplayBox(th){
+         var t = $(th);
+        t.toggleClass('showvisi');
+        t.next().addClass('showvisi');
+        t.siblings(".rec-box,.replylist").toggle();
+        t.parents(".content").siblings(".receive").toggle();
+    }
+
+
+    var goods_id = $("#goods_id").val();
+
+    function reply(th){
+         var t=$(th);
+         var txt = t.parent().siblings().children('.txt');
+         var content =$.trim( txt.val()); //回复内容
+         var reply = txt.attr("placeholder");
+        if(content == ''){
+            layer.msg('请填写回复内容', {time:2000});
+            return ;
+        }
+
+         var url = '/service/user',
+             act = 'add_comment_reply',
+             gid = $("#goods_id").val(),  //商品id
+             cid = t.parents("li").attr("id"), //回复楼层id
+             pid = t.data("pid"), //父回复
+             ptype = t.data("ptype"); //
+
+         $.get(url ,{act:act,cid:cid,pid:pid,ptype:ptype,content:content}, function(res) {
+             if(res.status == 0){
+                 //提交成功后 显示提交的回复
+
+                 var html= '<div class="receive"><p><span class="user-name" style="color:#007cc3;">'+reply+'：</span>'+content+'</p></div>';
+                 if(ptype == 1){
+                     t.parents(".replylist").append(html);
+                 }else{
+                     t.parents(".rec-box").siblings(".replylist").append(html);
+                 }
+                 t.parents('.rec-box').hide().find('.txt').val();//隐藏输入框
+                 var n = t.parents(".receive").children("a").children("em");
+                 n.html(parseInt(n.html())+1);
+
+             }
+             layer.msg(res.message, {time:2000});
+        },'json'  );
+
+    }
 
 </script>
 </html>

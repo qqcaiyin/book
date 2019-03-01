@@ -7,9 +7,13 @@ use App\Entity\Balance_log;
 use App\Entity\Category;
 use App\Entity\Member;
 use App\Entity\Member_grade;
+use App\Entity\Member_log;
 use App\Entity\Order;
 use App\Entity\Order_products;
+use App\Entity\Order_return_apply;
 use App\Entity\Pdt_id_attr;
+use App\Entity\Return_apply_images;
+use App\Entity\Return_log;
 use App\Models\M3Result;
 use Illuminate\Http\Request;
 
@@ -126,6 +130,39 @@ use DB;
 	}
 
 	/**
+	 *退货订单列表
+	 *
+	 */
+	public function toReturnList(){
+
+		$applyList = Order_return_apply::orderBy('id', 'desc')
+			->leftjoin('order_products as op' ,'op.order_son_sn','=','order_return_apply.order_sn')
+			->select('order_return_apply.*','op.product_id','op.product_name','op.spec_value')
+			->paginate(15);
+//dd($applyList);
+		return view('admin/order/return_list', compact('applyList'));
+	}
+	/**
+	 *退货订单列表
+	 *
+	 */
+	public function toReturnDetails(Request $request){
+
+		$data = $request->all();
+		$applyList = Order_return_apply::where('order_return_apply.return_sn',$data['sn'])
+			->leftjoin('order_products' ,'order_products.order_son_sn','=','order_return_apply.order_sn')
+			->leftjoin('product','product.id','=','order_products.product_id')
+			->leftjoin('order_return as ot','ot.return_sn','=','order_return_apply.order_sn')
+			->select('order_products.*','order_return_apply.*','product.preview','ot.express_sn')
+			->first()->toarray();
+		$applydetails = $applyList;
+		$img = Return_apply_images::where('return_sn',$data['sn'])->get()->toarray();
+		$applydetails['img'] =$img;
+		//dd($applydetails);
+		return view('admin/order/returndetails', compact('applydetails'));
+	}
+
+	/**
 	 *订单添加界面
 	 *
 	 */
@@ -235,5 +272,71 @@ use DB;
 		return $m3_result->toJson();
 
 	}
+
+	public function orderSer(Request $request){
+		$data = $request->all();
+		$m3_result = new M3Result;
+		$act = isset($data['act']) ? $data['act'] :'';
+
+		if($act == 'audit_tj'){
+			$m3_result->status = 0;
+			$m3_result->message = '提交成功' ;
+
+			$status = isset($data['st']) ? intval($data['st'] ):0;
+			$return_sn = isset($data['sn']) ? $data['sn'] :'';
+			$content = isset($data['content']) ? $data['content'] :'';
+
+			$desc ='';
+			if($status == 1){
+				$desc = '审核通过，备注：'.$content   ;
+			}
+
+			$res = Order_return_apply::where('return_sn',$return_sn)->update([
+				'status'=> $status,
+				'audit_why' => $content,
+				'audit_time' => time(),
+			]);
+			if(!$res){
+				$m3_result->status = 10;
+				$m3_result->message = '重新提交' ;
+				return $m3_result->toJson();
+			}
+			$res = Return_log::insertGetId([
+				'return_sn' => $return_sn,
+				'party'=>1,
+				'desc' =>$desc,
+				'time'=>time(),
+			]);
+			if(!$res){
+				$m3_result->status = 10;
+				$m3_result->message = '重新提交' ;
+			}
+			return $m3_result->toJson();
+		}else if(  $act == 'audit_sign'){
+//退换货  卖家签收
+			$return_sn = isset($data['sn']) ? $data['sn'] :'';
+			if($return_sn == ''){
+				$m3_result->status = 10;
+				$m3_result->message = '编号出错' ;
+				return $m3_result->toJson();
+			}
+			//更新状态
+			$res = Order_return_apply::where('return_sn',$return_sn)->update(['shipping_status'=>2]);
+			dd($res);
+			if(!$res){
+				$m3_result->status = 10;
+				$m3_result->message = '刷新后，重新签收';
+			}
+
+			$m3_result->status = 0;
+			$m3_result->message = '已签收' ;
+			return $m3_result->toJson();
+
+
+		}
+
+
+
+}
 
 }

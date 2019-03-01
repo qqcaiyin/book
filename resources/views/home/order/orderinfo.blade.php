@@ -3,13 +3,7 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <link type="text/css" rel="stylesheet" href="/home/css/style.css" />
-    <!--[if IE 6]>
-    <script src="/home/js/iepng.js" type="text/javascript"></script>
-    <script type="text/javascript">
-        EvPNG.fix('div, ul, img, li, input, a');
-    </script>
-    <![endif]-->
-
+    <link rel="stylesheet" type="text/css" href="/admin/lib/Hui-iconfont/1.0.8/iconfont.css" />
     <title>订单结算</title>
     <style>
         .topay{
@@ -86,7 +80,7 @@
                     <td class="car_th" width="140">小计</td>
                 </tr>
                 @foreach($cartList as $value)
-                    <tr style="background-color:#fff;">
+                    <tr  id="{{$value['cart_pdt']['id']}}"  class="cart-pdt"  style="background-color:#fff;">
                         <td>
                             <div class="c_s_img"><img src="{{url($value['cart_pdt']['preview'])}}" width="73" height="73" /></div>
                            {{$value['cart_pdt']['name']}}
@@ -94,7 +88,7 @@
                         <td align="center">
                             @if(isset($value['cart_pdt']['spec_name'] ))
                             @foreach($value['cart_pdt']['spec_name'] as $v)
-                                {{$v }}<br>
+                                [{{$v }}]<br>
                             @endforeach
                             @endif
                         </td>
@@ -107,40 +101,51 @@
             </table>
             <div class="two-t0">
                 <div class="two_t">
-                    <span class="fr"><a href="javascript:;" id="changeAddr" onclick="changeAddr();">更改</a></span><h4>收货人信息</h4>
-                </div>
-                <div  style="background-color: #fff;">
-                    <div  class = "two-t1" >
-                        默认地址：
-                        <span class="addr-default" style=" height:100px;">
-                            {{$memberAddress[0]['province']}}&nbsp;
-                            {{$memberAddress[0]['city']}}&nbsp;
-                            {{$memberAddress[0]['district']}}&nbsp;
-                            {{$memberAddress[0]['zipcode']}}&nbsp;
-                            {{$memberAddress[0]['consignee']}}&nbsp;
-                            {{$memberAddress[0]['moble']}}&nbsp;
-                        </span>
-                        <input type="hidden"  id="cneeid" name="cneeid" value="{{$memberAddress[0]['id']}}"  >
-                    </div>
-                    <div style="display: none; background-color: #fff; "   class="addr-list" >
-                        @foreach( $memberAddress as $v)
-                            @if($v['is_default'] == 0)
-                                <div style="border:1px solid #ddd; height:50px; margin-top:15px;  " >
-                                   <input type="radio"  name="addr"  value="{{$v['id']}}"    class="addr">
-                                    <span class="">
-                                      {{$v['province']}}&nbsp;
-                                        {{$v['city']}}&nbsp;
-                                        {{$v['district']}}&nbsp;
-                                        {{$v['zipcode']}}&nbsp;
-                                        {{$v['consignee']}}&nbsp;
-                                        {{$v['moble']}}&nbsp;
-                                    </span>
-                                </div>
-                            @endif
-                        @endforeach
-                    </div>
+                    <span class="fr"><a href="javascript:;" id="changeAddr" onclick="changeAddr();"></a></span><h4>收货人信息</h4>
                 </div>
 
+                <div>
+                    <div class="sh-address">
+                        <ul>
+                            <!- ----遍历已有地址  begin   -->
+                            @if($data)
+                                @foreach($data as $val)
+                                    <li class="other-add default-add" id="30" data-cityid="110100">
+                                        <div class="add-box" >
+                                            <span class="remove vivi-blue" onclick="removeAddr(this, {{$val['id']}})">X</span>
+                                            <div class="name-add">
+                                                <span class="name">{{$val['consignee']}}</span>
+                                                <span style="float:right; display:inline-block;"></span>
+                                            </div>
+                                            <div class="add-detail">
+                                                <p class="name"> {{$val['province']}}{{$val['city']}}{{$val['district']}}</p>
+                                            </div>
+                                            <div>
+                                                <span class="moblie">{{$val['moble']}}</span>
+                                                <span style="margin-left: 10px; ">@if($val['is_default']==1)默认地址@endif</span>
+                                                <a class="change-default change vivi-blue"   href="javascript:;" onclick="addEditAddr('/address_add?act=edit_addr&id={{$val['id']}}' );"> 修改</a>
+                                            </div>
+                                        </div>
+                                    </li>
+                                @endforeach
+                            @endif
+                            <!- ----遍历已有地址    end -->
+                            <!- ----添加新地址    begin -->
+                            @if($count == 1)
+                                <li class="add-add">
+                                    <div class="add-box add-box-center">
+                                        <a style="text-decoration: none;  position: absolute; top:30px; left:40%;"  onclick="addEditAddr( '/address_add?act=add_addr&id=  @if($data){{$data[0]['member_id']}}') @endif" >
+                                            <i class="Hui-iconfont" style=" display: block; font-size: 18px;">&#xe604;</i>
+                                            添加新地址
+                                        </a>
+                                    </div>
+                                </li>
+                            @endif
+                            <!- ----添加新地址    end -->
+                        </ul>
+                    </div>
+                </div>
+            <!- ----配送方式    start -->
             </div>
 
             <div class="two_t">
@@ -163,7 +168,8 @@
                 </tr>
                 @endforeach
             </table>
-
+            <!- ----配送方式    end -->
+            <!- ----支付方式    start -->
             <div class="two_t">
                 <h4>支付方式</h4>
             </div>
@@ -210,6 +216,17 @@
                     </ul>
                 </div>
             </div>
+            <!- ----优惠券    start -->
+            <div class="two_t">
+                <h4>使用优惠券(<em style="color:red;">2 </em>)
+                    <i class=" ff  Hui-iconfont down " style=" cursor: pointer;">&#xe6d5;</i>
+                    <input type="hidden" id="quan_sn" value="0"  >
+                    <input type="hidden" id="parv" value="0"  >
+                </h4>
+                <div class="quan-list" style="  background-color: #fff; ">
+                </div>
+            </div>
+            <!- ----优惠券    end -->
             <div class="two_t">
                <h4>结算信息</h4>
             </div>
@@ -217,15 +234,20 @@
                 <tr>
                     <td></td>
                     <td></td>
-                    <td align="right">
-                        <span color="#ff4e00">6
-                        </span>
-                        件商品 , 总计：
-                        <span  id="sum" style=" font-weight: bolder; color:#8f8f8f; margin-left: 30px; width:30px; text-align: right" color="#ff4e00">{{$amount}}
-                        </span>
-                        <br/>
-                      运费：<span  id="shipPrice" style="font-weight: bolder; color:#8f8f8f; width:30px;margin-left: 30px;" >12.00</span><br>
-                        应付金额：<span id="sumPay" style="font-size:22px; color:#ff4e00;">{{$sumAndShip}}</span>
+                    <td style="text-align: right; ">
+                        <div style="width:100%;">
+                            <span style=" display: inline-block;   width:100%; margin-top: 1px; ">
+                                件商品 , 总计:<b  id="sum" style=" display: inline-block;  font-weight: bolder; color:#8f8f8f;  width:80px; text-align: right; color: #d62728;" >{{$amount}}
+                            </b>
+                            </span>
+                            <span class="sp"   style=" display: inline-block;    width:100%;   margin-bottom: 20px; ">
+                                 运费:<b id="shipPrice" style="display: inline-block;  font-weight: bolder; color:#8f8f8f;  color: #d62728;width:80px;" >12.00</b>
+                            </span>
+                            <span style=" display: inline-block;    width:100%;  margin-top: 16px; " >
+                                 应付金额(元):<b id="sumPay" style="  font-size:20px;  color: #d62728;">{{$sumAndShip}}</b>
+                            </span>
+
+                        </div>
                     </td>
                 </tr>
                 <tr valign="top">
@@ -374,14 +396,24 @@
 <script type="text/javascript" src="/home/js/n_nav.js"></script>
 <script type="text/javascript" src="/admin/lib/jquery/1.9.1/jquery.min.js"></script>
 <script type="text/javascript" src="/admin/lib/layer/2.4/layer.js"></script>
-
+<script type="text/javascript" src="/admin/static/h-ui/js/H-ui.min.js"></script>
+<script type="text/javascript" src="/admin/static/h-ui.admin/js/H-ui.admin.js"></script>
 <script type="text/javascript">
 
-
+    //添加地址+修改地址
+    function addEditAddr(url){
+        layer_show('',url,700,380);
+    }
 
     function changeAddr(){
         $('.addr-list').show();
     }
+
+
+
+
+
+
     /**
      * 选择快递方式
      * @return[type][description]
@@ -408,7 +440,9 @@
                    $.get(url,{'ship_id':ship_id},function(data){
                        if(data.status == 0){
                            $('#shipPrice').html(data.ship_price);
-                           var sumpay = parseFloat($('#sum').text())+parseFloat(data.ship_price);
+                           var t = $('input[name=selectQuan]:checked');
+                           var parvalue = t.data('parvalue');
+                           var sumpay = parseFloat($('#sum').text())+parseFloat(data.ship_price)-parseFloat(parvalue);
                            $('#sumPay').text(sumpay);
                        }
 
@@ -455,20 +489,67 @@
             },'json');
         });
 
+        //加载优惠券
+        $('.ff').click(function(){
+           var t = $('.ff');
+            var good_ids='';
+            var amount = parseFloat($('#sum').text());
+            $(".cart-pdt").each(function() {
+                good_ids += $(this).attr("id") + ",";
+            });
+            good_ids = good_ids.substring(0, good_ids.length - 1);
+
+            if(t.hasClass('up')){
+                //收起
+                $('#parv').val(0);
+                calcTotal();
+                t.html('&#xe6d5;');
+                t.removeClass('up').addClass('down');
+                $(".quan-list").hide(500);
+                return;
+            }else if(t.hasClass('down')){
+                //展开
+                t.html('&#xe6d6;');
+                t.removeClass('down').addClass('up');
+
+                $.get('/service/order',{act:'get_myquan',amount:amount,good_ids:good_ids},function(res){
+                    if(res.status == 0){
+                        var html;
+                        html='';
+                        $.each(res.data, function(k, v) {
+                            html += '  <p style="border-bottom: 1px dashed #ddd; color:#007cc3;">['+ v.name+'], 抵用金额 <span  style=" color:red; "   >'+      v.parvalue+'</span>元' ;
+                            html += ' <input type="radio"  class="selectQuan"   data-parvalue="'+ v.parvalue + '" name="selectQuan"  onclick="selQuan(this);"  value=" ' + v.quan_sn  + ' "  >使用优惠券</p>';
+
+                        });
+                        $('.quan-list').html(html);
+                    }else{
+                        layer.msg(res.message, {time:2000});
+                    }
+
+                },'json');
+                $(".quan-list").slideDown(500);
+            }
+        });
+
+
+
 
         //选中使用余额
         $('#userbalance').click(function(){
             inputdis();
             calcTotal();
             $('#balance').css('display',$(this).is(":checked") ? "inline-block" : "none"  )
-        })
+        });
 
         //选中使用积分
         $('#userpoint').click(function(){
             inputdis();
             calcTotal();
             $('#point').css('display',$(this).is(":checked") ? "inline-block" : "none"  )
-        })
+        });
+
+
+
 
         //提交订单
         $('#orderBtn').click(function(){
@@ -485,6 +566,8 @@
                shipid =  $("input[name='shipping']:checked").val();
             });
 
+
+
             var url = '/service/order';
             var data = {
                 act :'add_order' ,
@@ -492,6 +575,8 @@
                 shipid: $("input[name='shipping']:checked").val(),  // 快递
                 balance:$("#userbalance").is(":checked")? $.trim($("#balance").val()) :0 , //余额使用
                 point:  $("#userpoint").is(":checked")? $.trim($("#point").val()) :0 ,     //积分使用
+                parvalue: $.trim($("#parv").val()) , //余额使用
+                quan_sn: $('#quan_sn').val(),
                 paypwd:$.trim($("#cbkpaypwd").val()),
                 user_msg:$('#user_msg').val(),   //订单附言
             };
@@ -507,8 +592,6 @@
 
 
         });
-
-
 
        });
 
@@ -563,6 +646,8 @@
         }
     }
 
+
+
     var goods_amount = parseFloat({{$amount}});
     var pointpay = 100;
     var mostpoint =50;
@@ -577,6 +662,10 @@
         var balance = parseFloat($("#balance").siblings().children("b").html()); //现有余额
         var point_amount = 0; //积分抵用的金额
         var balance_amount = 0; //余额支付的金额
+        var parvalue = parseFloat($('#parv').val()); //优惠券抵用的金额
+
+        //扣除 优惠券 抵用金额  优惠券优先
+        payAmount = payAmount-parvalue;
 
         //积分
         if($('#userpoint').is(':checked')){
@@ -601,10 +690,26 @@
         }else{
             $('#balance').val('');
         }
+   // <span style=" display: inline-block;    width:100%;  margin-top: 16px; " >
+   //         应付金额(元):<b id="sumPay" style="  font-size:20px; color:#ff4e00;">{{$sumAndShip}}</b>
+   //         </span>
+
+
+        if(parvalue !=0){
+            $('.parv_sli').remove();
+            if ($("#parv-offset").length==0) {
+                $(".sp").after('<span class="parv_sli"  style="  display: inline-block; color:#007cc3; border-bottom: 1px dashed #ddd;  width:100%; ">优惠券抵用￥：<b id="parv-offset" style="display: inline-block;   width:80px;">-' + parvalue + '</b></span>');
+            }else{
+
+            }
+        }else{
+            $('.parv_sli').remove();
+        }
+
         //
         if($('#userpoint').is(':checked')){
             if ($("#point-offset").length==0) {
-                $("#shipPrice").append('<p class="point_sli" style=" margin-top:0px;"><span>积分抵用：</span><span class="txtmoney">￥<b id="point-offset"  style="color:#ff4e00; ">-' + point_amount + '</b></span></p>');
+                $(".sp").after('<span class="point_sli" style="   display: inline-block; color:#007cc3; border-bottom: 1px dashed #ddd; width:100%;">积分抵用：<b id="point-offset"  style="display: inline-block;   width:80px;">-' + point_amount + '</b></span>');
             }else{
 
             }
@@ -613,17 +718,27 @@
         }
         if($('#userbalance').is(':checked')){
             if ($("#balance-offset").length==0) {
-                $("#shipPrice").append('<p class="balance_sli"  style=" margin-top:0px;"><span>余额抵用：</span><span class="txtmoney">￥<b id="balance-offset" style="color:#ff4e00; ">-' + balance_use + '</b></span></p>');
+                $(".sp").after('<span class="balance_sli"  style=" display: inline-block;color:#007cc3; border-bottom: 1px dashed #ddd;  width:100%;">余额支付：<b id="balance-offset" style="display: inline-block;   width:80px; ">-' + balance_use + '</b></span>');
             }else{
 
             }
         }else{
             $('.balance_sli').remove();
         }
+
+
         $('#sumPay').html(payAmount);
 
     }
 
+    //选择要使用的优惠券
+    function selQuan(t){
+        var sn = $('input[name=selectQuan]:checked').val();
+        var parvalue = parseFloat( $(t).data('parvalue') );
+        $('#quan_sn').val(sn);
+        $('#parv').val(parvalue);
+        calcTotal();
+    }
 </script>
 
 </html>

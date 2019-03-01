@@ -86,7 +86,7 @@
             @foreach($cartList['products'] as $value)
             <tr  id="{{$value['cart_pdt']['id']}}"   data-spec="{{$value['cart_pdt']['spec']}}">
                 <td width="15">
-                    <input type="checkbox" name="ck_list" id="ck_list"  @if($value['is_checked']==1) checked @endif value="{{$value['cart_pdt']['id']}}" >
+                    <input type="checkbox" name="ck_list" id="ck_list"  @if(isset($value['is_checked'])&& $value['is_checked']==1) checked @endif value="{{$value['cart_pdt']['id']}}" >
                 </td>
                 <td>
                     <div class="c_s_img" style="text-align: center ; vertical-align: middle;"><img src="{{url($value['cart_pdt']['preview'])}}" width="73" height="73" /></div>
@@ -111,8 +111,11 @@
                 <td align="center" style="color:#ff4e00;">￥：<span id="subtotal" class="subtotal">{{$value['cart_pdt']['price'] * $value['count']}}</span>&nbsp;
                 </td>
                 <td align="center">
-                    <a href="javascript:;" class="addfav"   @if($value['myfav'] == 0)   onclick="addFav(this,{{$value['cart_pdt']['id']}});" @endif  >
-                        @if($value['myfav'] == 1)已收藏 @else 加入收藏  @endif</a><br>
+                    <a href="javascript:;" class="addfav"
+                       @if((isset($value['myfav']) && $value['myfav']!= 0) || !isset($value['myfav']))
+                       onclick="addFav(this,{{$value['cart_pdt']['id']}});"
+                            @endif  >
+                        @if(isset($value['myfav']) && $value['myfav'] == 1)已收藏 @else 加入收藏  @endif</a><br>
                     </bt><a href="javascript:;"  class="removeproducts"  onclick="removeGoods('{{$value['cart_pdt']['id']}}',
                     '{{$value['cart_pdt']['spec']}}');"  >删除</a>
                 </td>
@@ -296,9 +299,20 @@
             });
         });
 
+
         $('.topay').click(function(){
+            //购物车中有勾选的才能 提交
             if( $("#list input[name='ck_list']:checked").length > 0  ){
-                location.href='/order';
+
+                $.get('/service/cart' ,{act:'to_order'},function (res) {
+                   if(res.status == 0){
+                       location.href= res.data.url;
+
+                   }else{
+                       layer.msg(res.message, {time:2000});
+                   }
+
+                },'json')
             }else{
                 layer.msg('请选择需要购买的商品', {time:2000});
             }

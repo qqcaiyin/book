@@ -42,6 +42,7 @@
             <dd>
                 <ul>
                     <li><a data-href="{{url('/admin/order')}}" data-title="订单列表" href="javascript:void(0)">订单列表</a></li>
+                    <li><a data-href="{{url('/admin/return_list')}}" data-title="退货管理" href="javascript:void(0)">退货管理</a></li>
                 </ul>
             </dd>
         </dl>
@@ -54,16 +55,19 @@
                     <li><a data-href="{{url('/admin/grade')}}" data-title="等级管理" href="javascript:;">等级管理</a></li>
                     <li><a data-href="{{url('/admin/balance')}}" data-title="余额管理" href="javascript:;">余额管理</a></li>
                     <li><a data-href="member-record-browse.html" data-title="提现管理" href="javascript:void(0)">提现管理</a></li>
+                    <li><a data-href="{{url('/admin/comments')}}" data-title="评论列表" href="javascript:;">评论列表</a></li>
                 </ul>
             </dd>
         </dl>
 
         <dl id="menu-comments">
-            <dt><i class="Hui-iconfont">&#xe622;</i> 评论管理<i class="Hui-iconfont menu_dropdown-arrow">&#xe6d5;</i></dt>
+            <dt><i class="Hui-iconfont">&#xe622;</i> 营销管理<i class="Hui-iconfont menu_dropdown-arrow">&#xe6d5;</i></dt>
             <dd>
                 <ul>
-                    <li><a data-href="http://h-ui.duoshuo.com/admin/" data-title="评论列表" href="javascript:;">评论列表</a></li>
-                    <li><a data-href="feedback-list.html" data-title="意见反馈" href="javascript:void(0)">意见反馈</a></li>
+                    <li><a data-href="{{url('/admin/market/skipe')}}" data-title="限时抢购" href="javascript:;">限时抢购</a></li>
+                    <li><a data-href="{{url('/admin/comments')}}" data-title="拼团" href="javascript:;">拼团</a></li>
+                    <li><a data-href="{{url('/admin/market/quan_list')}}" data-title="优惠券" href="javascript:;">优惠券</a></li>
+                    <li><a data-href="{{url('/admin/market/distrib_add')}}" data-title="分销" href="javascript:;">分销</a></li>
                 </ul>
             </dd>
         </dl>
@@ -81,7 +85,7 @@
             <dt><i class="Hui-iconfont">&#xe61a;</i> 系统统计<i class="Hui-iconfont menu_dropdown-arrow">&#xe6d5;</i></dt>
             <dd>
                 <ul>
-                    <li><a data-href="charts-4.html" data-title="柱状图" href="javascript:void(0)">柱状图</a></li>
+                    <li><a data-href="{{url('/admin/charts/sale_total')}}" data-title="销售统计" href="javascript:void(0)">销售统计</a></li>
                 </ul>
             </dd>
         </dl>

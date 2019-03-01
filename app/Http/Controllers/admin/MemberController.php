@@ -5,8 +5,10 @@ namespace App\Http\Controllers\Admin;
 
 use App\Entity\Balance_log;
 use App\Entity\Category;
+use App\Entity\Comment;
 use App\Entity\Member;
 use App\Entity\Member_grade;
+use App\Entity\Member_log;
 use App\Models\M3Result;
 use Illuminate\Http\Request;
 
@@ -45,6 +47,7 @@ use DB;
 		}
 		return  view('admin/member/list',compact('members'));
 	}
+
 	/**
 	 *会员添加界面
 	 *
@@ -90,6 +93,27 @@ use DB;
 		//dd($memberAddr);
 		return view('admin/member/show',compact('member','memberAddr'));
 	}
+	/*
+	 * 用户评价列表
+	 *
+	 */
+	public function toComments(){
+
+
+		$comments = Comment::where('comment.is_del',0)
+			->orderby('comment.id','desc')
+			->leftjoin('product' ,'product.id','=','comment.pdt_id')//产品名称
+			->leftjoin('member','member.id','=','comment.member_id')
+			->select('comment.*','product.name','member.nickname')
+			->paginate(15);
+
+		return view('admin/member/comment_list', compact('comments'));
+
+
+
+	}
+
+
 
 //////////////////////////数据处理//////////////////////////////////////////////////
 	/*
@@ -437,5 +461,68 @@ use DB;
 		}
 		return $m3_result->toJson();
 	}
+
+
+	//
+	public function serComments(Request $request){
+		$data = $request->all();
+		$m3_result = new M3Result;
+		$act = isset($data['act']) ? $data['act'] :'';
+		if($act == 'is_show'){
+			//设置留言是否在前端显示
+			$id = isset($data['id']) ?intval($data['id']) : 0;
+			if($id == 0){
+				$m3_result->status = 10;
+				$m3_result->message = "刷新页面重试";
+				return $m3_result->toJson();
+			}
+			$res = Comment::where('id',$id)->first();
+			if($res->is_show == 1){
+				$res = Comment::where('id',$id)->update(['is_show'=>0]);
+				if($res){
+					$m3_result->status = 4;
+					$m3_result->message = "已设置为不显示";
+					return $m3_result->toJson();
+				}
+			}elseif($res->is_show == 0){
+				$res = Comment::where('id',$id)->update(['is_show'=>1]);
+				if($res){
+					$m3_result->status = 3;
+					$m3_result->message = "已设置为显示";
+					return $m3_result->toJson();
+				}
+			}
+
+		}else if($act =='del'){
+			//设置留言是否在前端显示
+			$id = isset($data['id']) ?intval($data['id']) : 0;
+			if($id == 0){
+				$m3_result->status = 10;
+				$m3_result->message = "刷新页面重试";
+				return $m3_result->toJson();
+			}
+
+			DB::beginTransaction();
+			$res1 = Comment::where('id',$id)->update(['is_del'=>1]);
+			//$res2 = Comment::where('id',$id)->update(['is_show'=>0]);
+			if($res1 ){
+				DB::commit();
+				$m3_result->status = 0;
+				$m3_result->message = "删除成功";
+				return $m3_result->toJson();
+			}else{
+				DB::rollBack();
+				$m3_result->status = 10;
+				$m3_result->message = "异常，事务回滚";
+				return $m3_result->toJson();
+			}
+
+		}
+
+
+
+
+	}
+
 
 }

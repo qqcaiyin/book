@@ -23,44 +23,34 @@
     <title>我的账户</title>
 
     <style>
+        .center1{  width:100%; padding: 0;  border:none;background-color: #fff;  }
 
-        .center1{  width:100%; padding: 0;  border:none;  }
 
         .center1 .dingdan{ margin-top: 20px;  }
-        .center1 .dingdan .dd-list{ margin-top: 20px ; border:1px solid #eee; padding:1px;}
-        .center1 .dingdan .dd-list:hover{  border:1px solid #d62728;}
+        .center1 .dingdan .dd-list{ margin-top: 0px ;  }
 
-        .dd-title{ background-color: #ebebeb; padding: 0 10px 0 10px;margin-left:0px;  height:38px; line-height: 38px; border:1px solid #eee; }
+        .dd-title{  display: table;   width:100%; background-color: #eee; height:34px; line-height: 34px;}
+
+        .dd-title ul li{
+            display:table-cell;float:left;height:34px;line-height: 34px; text-align: center;
+        }
+        .dd-title .td1 { width:15%;text-align: center;}
+        .dd-title .td2 { width:40%;text-align: left;}
+        .dd-title .td3 { width:35%;text-align: center;}
+        .dd-title .td4 { width:10%;text-align: center;}
         .dd-title p {display: inline-block;color:#828282; margin-right: 45px;}
-        .dd-detail{ display: table;  padding: 0; width:100%; background-color: #fff; }
+
+
+        .dd-detail{ display: table;  padding: 0; width:100%; background-color: #fff;text-align: center;  }
         .dd-detail div{ margin:0 auto;  }
         .dd-detail ul{  background-color: #fff; }
-        .dd-detail ul li{  float:left; disply:table-cell; vertical-align: top; border-right: 1px solid  #eee; text-align: center;  display: inline-block;}
-        .dd-coll{float: left;  margin: 0px; width:500px; padding:0; display: table-cell;  }
-        .dd-coll .more-pro{
-            padding:15px;  width:550px;
-        }
+        .dd-detail ul li{  float:left; disply:table-cell; vertical-align: middle; border-bottom:1px dashed #ddd; text-align: center;  display: inline-block;}
+        .dd-coll{ display: table; width:100%; border-bottom: 1px solid #eee;   }
+        .dd-coll .more-pro{  width:10%; display: table-cell; text-align: left; vertical-align: top; float:left;  }
 
-        .price { display: table-cell;vertical-align: top;width:100px;text-align: center;}
-        .num { display: table-cell;vertical-align: top;width:100px;text-align: center;}
-
-        .dd-col2{  width:130px; padding: 20px 5px  ; height:100%; }
-        .dd-col2.b{ font-size: 14px; margin-bottom: 8px; display: inline-block; font-weight: bolder;}
-        .dd-col3{ width:130px;  padding: 15px 18px 15px 18px ; }
-        .dd-col4{ float: right;  height:100%;   padding: 15px 18px 15px 18px ; border:none; }
-        .dd-col4 a{display:block; width:78px; height:24px; border:1px solid #dcdcdc; text-align: center; line-height: 24px;
-            margin: 8px 0 0 8px;}
-        .dd-col4 a:hover{ border:1px solid #007cc3;  }
-        .dd-col4 .style{ border-color:#de342f; color:#de342f;}
-        .dd-col4 .style:hover{ border-color:#de342f; color:#de342f;}
-
-        .center-bottom{ width:100%;  border:1px solid #eee;  margin-top: 15px; background-color: #fff;  }
-        .center-bottom .dd{ width:100%; overflow: hidden; margin: 20px 0 10px 0; padding: 0; }
-        .center-bottom .dd .temprap{ }
-        .dd-price{color:red;}
-        .lltitle{ height:20px; overflow: hidden; display: block; text-align: left;}
-        .d-list dl{ margin-right: 24px; }
-
+        .dd-coll .price { display: table-cell;width:40%;text-align: center; float:left;vertical-align: middle; }
+        .dd-coll .num { display: table-cell;width:40%;text-align: center;float:left; vertical-align: middle;}
+        .dd-coll .total { display: table-cell;width:10%;text-align: center;float:left; vertical-align: middle;}
 
     </style>
 </head>
@@ -202,163 +192,55 @@
                         </ul>
                     </div>
                 </div>
+                <!--评论订单列表 -start--->
+                    <div class="dingdan" style="margin-top: 0px;" >
+                        <div class="dd-list">
+                            <div class="dd-title">
+                                <ul >
+                                    <li class="td1">订单号</li>
+                                    <li class="td2">商品名称</li>
+                                    <li class="td3">评论内容</li>
+                                    <li class="td4">操作</li>
+                                </ul>
+                            </div>
+                            <div class="dd-detail">
+                                <ul>
+                                    @foreach( $comments['orderData'] as $pdt)
+                                        <li class="dd-coll" style="float:left; ">
+                                            <div >
+                                                <div class="more-pro" style="text-align: center; ">
+                                                   {{$pdt['order_sn']}}
+                                                </div>
+                                                <div  class= "price" style="text-align: center; "  >
+                                                    <div style=" float:left; margin-right: 0px; text-align: left;padding: 0 0 0 15px;">
+                                                        @foreach($pdt['pdt'] as $v)
+                                                            <p>
+                                                                {{$v['name']}}
+                                                            </p>
+                                                         @endforeach
+                                                    </div>
+                                                </div>
+                                                <div class="num"  >
+                                                    @foreach($pdt['pdt'] as $v)
+                                                        <p>&nbsp;
+                                                        @if($v['star_num']!=0)
 
-                <div class="dingdan">
-                    <div class="dd-list">
-                        <div class="dd-title">
-                            <p>订单号<span>  2019-10-12 11:33:11</span></p>
-                            <p>订单编号:&nbsp;<span>  21222922991</span> </p>
-                        </div>
-                        <div class="dd-detail">
-                            <ul>
-                                <li class="dd-coll" style="float:left; ">
-                                    <div  class="more-pro"  >
-                                        <div style="  text-align: left; display:table-cell; vertical-align: top;">
-                                            <a style="float: left; width:80px; height:80px;display: inline-block;">
-                                                <img src="/images/head.jpg"  style="width:80px; height:80px;">
-                                            </a>
-                                            <div style=" float:left; margin-right: 0px; width:204px; text-align: left;padding: 0 0 0 15px;">
-                                                <a href="NRVRv-g.html" target="_blank">
-                                                LG睿嫣 润膏舒盈滋养洗发水250ml（润膏）超值两只装
-                                                <p class="qiangrey"></p>
-                                                </a>
+                                                              <span style="color: #007cc3; font-weight: bolder;">[{{$v['star_num']}} 星]</span>  {{$v['comment']}}
+                                                        @endif
+                                                        </p>
+                                                    @endforeach
+                                                </div>
+                                                <div class="total" >
+                                                  <a  style="color: #007cc3" href="{{url('/details?oid=' . $pdt['order_sn'])}}">订单详情   </a>
+                                                </div>
                                             </div>
-                                        </div>
-                                        <div  class= "price"  >
-                                            ￥100.00
-                                        </div>
-                                        <div class="num" >
-                                            2
-                                        </div>
-                                    </div>
-                                    <div  class="more-pro" >
-                                        <div style="  text-align: left; display:table-cell; vertical-align: top;">
-                                            <a style="float: left; width:80px; height:80px;display: inline-block;">
-                                                <img src="/images/head.jpg"  style="width:80px; height:80px;">
-                                            </a>
-                                            <div style=" float:left; margin-right: 0px; width:204px; text-align: left;padding: 0 0 0 15px;">
-                                                <a href="NRVRv-g.html" target="_blank">
-                                                    LG睿嫣 润膏舒盈滋养洗发水250ml（润膏）超值两只装
-                                                    <p class="qiangrey"></p>
-                                                </a>
-                                            </div>
-                                        </div>
-                                        <div  class= "price"  >
-                                            ￥100.00
-                                        </div>
-                                        <div class="num" >
-                                            2
-                                        </div>
-                                    </div>
-                                </li>
-
-                                <li  class="dd-col2"  >
-
-                                        <b >￥3330</b>
-
-                                </li>
-                                <li class="dd-col3">
-                                    <p style="font-size: 14px; margin-bottom: 8px; display: block;">待付款</p>
-                                    <a> 查看详情</a>
-                                </li>
-                                <li class="dd-col4" style="border-right:none;  "   >
-                                    <a class="style"> 付款</a>
-                                    <a> 取消订单</a>
-                                </li>
-                            </ul>
-                        </div>
-
-
-                    </div>
-                    <div class="dd-list">
-                        <div class="dd-title">
-                            <p>下单时间:&nbsp;<span>  2019-10-12 11:33:11</span></p>
-                            <p>订单编号:&nbsp;<span>  21222922991</span> </p>
-                        </div>
-                        <div class="dd-detail">
-                            <ul>
-                                <li class="dd-coll" style="float:left; ">
-                                    <div class="more-pro" >
-                                        <div style="  text-align: left; display:table-cell; vertical-align: top;">
-                                            <a style="float: left; width:80px; height:80px;display: inline-block;">
-                                                <img src="/images/head.jpg"  style="width:80px; height:80px;">
-                                            </a>
-                                            <div style=" float:left; margin-right: 0px; width:204px; text-align: left;padding: 0 0 0 15px;">
-                                                <a href="NRVRv-g.html" target="_blank">
-                                                    LG睿嫣 润膏舒盈滋养洗发水250ml（润膏）超值两只装
-                                                    <p class="qiangrey"></p>
-                                                </a>
-                                            </div>
-                                        </div>
-                                        <div  class= "price"  >
-                                            ￥100.00
-                                        </div>
-                                        <div class="num" >
-                                            2
-                                        </div>
-                                    </div>
-                                </li>
-                                <li  class="dd-col2" >
-                                    总额： ￥3330
-                                    <br>
-                                    应付： <b >￥3330</b>
-                                </li>
-                                <li class="dd-col3">
-                                    <p style="font-size: 14px; margin-bottom: 8px; display: block;">已删除</p>
-                                    <a> 查看详情</a>
-                                </li>
-                                <li class="dd-col4"  style=" border-right:none; "  >
-
-                                    <a> 再次购买</a>
-                                </li>
-                            </ul>
+                                        </li>
+                                    @endforeach
+                                </ul>
+                            </div>
                         </div>
                     </div>
-                    <div class="dd-list">
-                        <div class="dd-title">
-                            <p>下单时间:&nbsp;<span>  2019-10-12 11:33:11</span></p>
-                            <p>订单编号:&nbsp;<span>  21222922991</span> </p>
-                        </div>
-                        <div class="dd-detail">
-                            <ul>
-                                <li class="dd-coll" style="float:left; ">
-                                    <div class="more-pro" >
-                                        <div style="  text-align: left; display:table-cell; vertical-align: top;">
-                                            <a style="float: left; width:80px; height:80px;display: inline-block;">
-                                                <img src="/images/head.jpg"  style="width:80px; height:80px;">
-                                            </a>
-                                            <div style=" float:left; margin-right: 0px; width:204px; text-align: left;padding: 0 0 0 15px;">
-                                                <a href="NRVRv-g.html" target="_blank">
-                                                    LG睿嫣 润膏舒盈滋养洗发水250ml（润膏）超值两只装
-                                                    <p class="qiangrey"></p>
-                                                </a>
-                                            </div>
-                                        </div>
-                                        <div  class= "price"  >
-                                            ￥100.00
-                                        </div>
-                                        <div class="num" >
-                                            2
-                                        </div>
-                                    </div>
-                                </li>
-                                <li  class="dd-col2" >
-                                    总额： <b >￥3330</b>
-                                    <br>
-                                    应付： <b >￥3330</b>
-                                </li>
-                                <li class="dd-col3">
-                                    <p style="font-size: 14px; margin-bottom: 8px; display: block;">待付款</p>
-                                    <a> 查看详情</a>
-                                </li>
-                                <li class="dd-col4"  style=" border-right:none; "  >
-                                    <a> 付款</a>
-                                    <a> 再次购买</a>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
+                <!--评论订单列表 -end--->
             </div>
 
         </div>

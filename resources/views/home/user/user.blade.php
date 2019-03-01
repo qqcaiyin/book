@@ -56,18 +56,24 @@
         .center1 .dingdan .dd-list{ margin-bottom: 20px ; border:1px solid #eee; padding:1px;}
         .center1 .dingdan .dd-list:hover{  border:1px solid #d62728;}
 
-        .dd-title{ background-color: #ebebeb; padding: 0 10px 0 10px;margin-left: 1px;  height:38px; line-height: 38px; border:1px solid #eee; }
+        .dd-title{ background-color: #ebebeb; padding: 0 10px 0 10px;margin-left:0px;  height:38px; line-height: 38px; border:1px solid #eee; }
         .dd-title p {display: inline-block;color:#828282; margin-right: 45px;}
-        .dd-detail{ display: table;  }
-        .dd-detail ul{display: table-row;  background-color: #fff; }
-        .dd-coll{ width:500px;padding: 0; display: table-cell; }
+        .dd-detail{ display: table;  padding: 0; width:100%; background-color: #fff; }
+        .dd-detail div{ margin:0 auto;  }
+        .dd-detail ul{  background-color: #fff; }
+        .dd-detail ul li{  float:left; disply:table-cell; vertical-align: top;  text-align: center;  display: inline-block;}
+        .dd-coll{float: left;  margin: 0px; width:60%; padding:0; display: table-cell;  }
+        .dd-coll .more-pro{
+            padding:15px;  width:550px;
+        }
 
-        .price { display: table-cell;vertical-align: top;width:100px;text-align: center;}
-        .num { display: table-cell;vertical-align: top;width:100px;text-align: center;}
-        .dd-col2{  float:left;width:120px;height:80px; display:table-cell; vertical-align: top; border-left:1px solid #eee; text-align: center; padding: 15px 18px 15px 18px ;  list-style: none;  }
+        .price { display: table-cell;vertical-align: top;width:80px;text-align: center;}
+        .num { display: table-cell;vertical-align: top;width:80px;text-align: center;}
+
+        .dd-col2{  width:100px; padding: 20px 5px  ; height:100%; }
         .dd-col2.b{ font-size: 14px; margin-bottom: 8px; display: inline-block; font-weight: bolder;}
-        .dd-col3{ float:left;width:80px;height:80px; display:table-cell; vertical-align: top; border-left:1px solid #eee; text-align: center; padding: 15px 18px 15px 18px ;  list-style: none; }
-        .dd-col4{ float:left;width:80px;height:80px; display:table-cell; vertical-align: top; border-left:1px solid #eee; text-align: center; padding: 15px 18px 15px 18px ;  list-style: none; }
+        .dd-col3{ width:90px;  padding: 15px 18px 15px 18px ; }
+        .dd-col4{ float: left; width:100px; height:100%;   padding: 15px 18px 15px 18px ; border:none; }
         .dd-col4 a{display:block; width:78px; height:24px; border:1px solid #dcdcdc; text-align: center; line-height: 24px;
             margin: 8px 0 0 8px;}
         .dd-col4 a:hover{ border:1px solid #007cc3;  }
@@ -196,7 +202,7 @@
                     <li><a href="{{url('/myorder')}}">我的订单</a></li>
                     <li><a href="{{url('/mycomment')}}">我的评价</a></li>
                     <li><a href="{{url('/fav')}}">我的收藏</a></li>
-                    <li><a href="#">退换货</a></li>
+                    <li><a href="{{url('/myservice')}}">退换货</a></li>
                 </ul>
             </div>
             <div class="left_m">
@@ -204,8 +210,8 @@
                 <ul>
                     <li><a href="{{url('/mymoney')}}">我的钱包</a></li>
                     <li><a href="{{url('/mypoint')}}">积分</a></li>
-                    <li><a href="Member_Msg.html">优惠券</a></li>
-                    <li><a href="Member_Links.html">个人信息</a></li>
+                    <li><a href="{{url('/myquan')}}">优惠券</a></li>
+                    <li><a href="{{url('/userinfo')}}">个人信息</a></li>
                     <li><a href="{{url('/address')}}">收货地址</a></li>
                     <li><a href="#">账户安全</a></li>
                     <li><a href="#">分销</a></li>
@@ -218,9 +224,9 @@
                     <div class="user-detail">
                         <div class="head-name">
                             <a class="touxiang" href="#">
-                                <img src="/images/head.jpg" style="height: 60px; width:60px;">
+                                <img src="{{$userInfo['avatar']}}" style="height: 60px; width:60px;">
                             </a>
-                            <p class="username">您好! xxx</p>
+                            <p class="username">您好! {{$userInfo['nickname']}}</p>
                         </div>
                         <div class="user-info">
                             <div class="left">
@@ -298,9 +304,13 @@
 
                                         @if($order->status == 0)
                                             <a class="style">去支付</a>
-                                            <a class="style" href="javascript:void(0);" onclick="order_cancel(this,'{{$order->order_sn}}' ,'{{$order->id}}')">取消订单</a>
+                                            <a  href="javascript:void(0);" onclick="order_cancel(this,'{{$order->order_sn}}' ,'{{$order->id}}')">取消订单</a>
                                         @endif
-                                        @if($order->status >= 1)<a>再次购买</a>@endif
+                                        @if($order->status == 5 )
+                                            <a href=" {{url('/details?act=sign&oid='.$order->order_sn)}} " style="border:1px solid #007cc3;" style="margin: 5px  40px; " >签收</a>
+                                        @endif
+                                        @if($order->status == 6)<a href="{{url('/comment?oid=' .$order->order_sn )}}"style="border:1px solid #007cc3;">评论</a>@endif
+                                        @if($order->status >= 1)<a   href="{{url('/service/cart? act=readd_cart&oid=' . $order->id)}}">再次购买</a>@endif
                                     </li>
                                 </ul>
                             </div>
@@ -333,8 +343,6 @@
 
                         </div>
                     </div>
-
-
                 </div>
             </div>
 

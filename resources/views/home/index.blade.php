@@ -1,5 +1,6 @@
 @extends('home.master')
-
+<link rel="stylesheet" type="text/css" href="/admin/lib/Hui-iconfont/1.0.8/iconfont.css" />
+<link rel="stylesheet" type="text/css" media="screen" href="https://cdn.staticfile.org/ionicons/2.0.1/css/ionicons.min.css">
 <style>
 
     .tim{
@@ -30,40 +31,40 @@
     </div>
 </div>
 <div class="top">
-    <div class="logo"><a href="Index.html"></a></div>
+    <div class="logo"></div>
     <div class="search">
-        <form>
-            <input type="text" value="" class="s_ipt" />
+        <form name="search" action="{{url('/cate') }}"  method="get">
+            <input type="text" name="words" value="" class="s_ipt" />
             <input type="submit" value="搜索" class="s_btn" />
+            <input type="hidden" name="at"  value="search"  />
         </form>
         <span class="fl">
-            @foreach($keywords as $keyword)
-            <a href="#">{{$keyword->name}}</a>
+           @foreach($keywords as $keyword)
+                <a href="#">{{$keyword->name}}</a>
             @endforeach
         </span>
     </div>
-    <div class="i_car">
-        <div class="car_t">购物车 [ <span>3</span> ]</div>
-        <div class="car_bg">
-            <!--Begin 购物车未登录 Begin-->
-            <div class="un_login">还未登录！<a href="Login.html" style="color:#ff4e00;">马上登录</a> 查看购物车！</div>
-            <!--End 购物车未登录 End-->
-            <!--Begin 购物车已登录 Begin-->
-            <ul class="cars">
-                <li>
-                    <div class="img"><a href="#"><img src="images/car1.jpg" width="58" height="58" /></a></div>
-                    <div class="name"><a href="#">法颂浪漫梦境50ML 香水女士持久清新淡香 送2ML小样3只</a></div>
-                    <div class="price"><font color="#ff4e00">￥399</font> X1</div>
-                </li>
 
-                <li>
-                    <div class="img"><a href="#"><img src="images/car2.jpg" width="58" height="58" /></a></div>
-                    <div class="name"><a href="#">香奈儿（Chanel）邂逅活力淡香水50ml</a></div>
-                    <div class="price"><font color="#ff4e00">￥399</font> X1</div>
+    <div class="i_car">
+        <div class="car_t">购物车 [ <span class="cartinfo" >{{$cartItems['count']}}</span> ]</div>
+        <div class="car_bg">
+            <div style=" width:100%; height:30px;border-bottom: 1px solid #eee; background-color: #eee;" ></div>
+
+            <ul class="cars" >
+                <li id="[id1]" data-spec = "[spec]" >
+                    <div class="img" ><a href="#"><img src="[preview1]" width="58" height="58" /></a></div>
+                    <div class="name"  style=" width:120px; "><a href="#">[name1]</a></div>
+                    <div class="price"  style=" float: right;  width:110px; text-align: right; padding-right:4px; "><span style="color:#ff4e00; ">￥[price1] X [count1]</span><br>
+                        <span class="del"  ><i class="icon ion-close-circled"></i></span>
+                    </div>
                 </li>
             </ul>
-            <div class="price_sum">共计&nbsp; <font color="#ff4e00">￥</font><span>1058</span></div>
-            <div class="price_a"><a href="#">去购物车结算</a></div>
+
+
+            <div style=" float:left; width:100%;background-color: #eee; padding:0;">
+                <div class="price_sum">共计:&nbsp; <span >￥</span><span class = 'cart-total'>{{$cartItems['amount']}}</span></div>
+                <div class="price_a"><a href="{{url('/cart')}}">去结算</a></div>
+            </div>
             <!--End 购物车已登录 End-->
         </div>
     </div>
@@ -151,7 +152,7 @@
              <span class="tim"id="second1">   </span>
             秒
         </span>
-        <span class="i_mores fr"><a href="javascript:void(0)">更多</a></span>
+        <span class="i_mores fr"><a href="javascript:void(0)">更多&nbsp; &nbsp; &nbsp;</a></span>
     </div>
     <div class="like">
         <div id="featureContainer1">
@@ -164,16 +165,16 @@
                                     <div class="box">
 
                                         <div class="imgbg">
-                                            <a href="{{url('/product/'. $hotProduct->id)}}"><img width="160" height="136" src="{{url($hotProduct->preview)}}"></a>
+                                            <a href="{{url('/product/'. $hotProduct['id'])}}"><img width="160" height="136" src="{{url($hotProduct['preview'])}}"></a>
                                         </div>
                                         <div class="name">
-                                            <a href="{{url('/product/'. $hotProduct->id)}}">
-                                                <h2>{{$hotProduct->name}}</h2>
-                                                {{$hotProduct->summary}}
+                                            <a href="{{url('/product/'. $hotProduct['id'])}}">
+                                                <h2>{{$hotProduct['name']}}</h2>
+                                                {{$hotProduct['summary']}}
                                             </a>
                                         </div>
                                         <div class="price">
-                                            <font>￥<span>{{$hotProduct->price}}</span></font> &nbsp; 26R
+                                            <font>￥<span>{{$hotProduct['price']}}</span></font> &nbsp; 26R
                                         </div>
                                     </div>
                                 </li>
@@ -193,21 +194,22 @@
     <!--Begin 楼层   家电 Begin-->
     <div class="i_t mar_10">
         <span class="floor_num">1F</span>
-        <span class="fl">家 电</span>
+        <span class="fl">手 机</span>
         <span class="i_mores fr">
-            @foreach($floors as $floor)
-            <a href="#">{{$floor->floor_name}}</a>&nbsp; &nbsp; &nbsp;
-          @endforeach
+            @foreach($allfloors[2] as  $floor)
+                <a href="#">{{$floor['floor_name']}}</a>&nbsp; &nbsp; &nbsp;
+            @endforeach
+            <a href="{{url('/cate?at=t2&id=1')}}">更多</a>&nbsp; &nbsp; &nbsp;
         </span>
     </div>
     <div class="content">
         <div class="fresh_mid">
             <ul>
 
-                @foreach($products as $fl)
+                @foreach($products[2] as $fl)
                     @foreach($fl['product'] as  $key =>$value)
                 <li>
-                    <div class="name"><a href="#">{{$value['name']}}</a></div>
+                    <div class="name"><a href="{{url('/cate?at=t2&id=1')}}">{{$value['name']}}</a></div>
                     <div class="price">
                         <font>￥<span>{{$value['price']}}</span></font> &nbsp; 26R
                     </div>
@@ -219,25 +221,26 @@
             </ul>
         </div>
     </div>
-    <!--End 进口 生鲜 End-->
+    <!--End  End-->
     <div class="content mar_20">
         <img src="/images/fl2.jpg" width="1200" height="110" />
     </div>
 
     <div class="i_t mar_10">
-        <span class="floor_num">1F</span>
+        <span class="floor_num">2F</span>
         <span class="fl">家 电</span>
         <span class="i_mores fr">
-            @foreach($floors as $floor)
-                <a href="#">{{$floor->floor_name}}</a>&nbsp; &nbsp; &nbsp;
-            @endforeach
+                @foreach($allfloors[1] as  $floor)
+                    <a href="#">{{$floor['floor_name']}}</a>&nbsp; &nbsp; &nbsp;
+                @endforeach
+                <a href="{{'/cate?at=t2&id=1'}}">更多</a>&nbsp; &nbsp; &nbsp;
         </span>
     </div>
     <div class="content">
         <div class="fresh_mid">
             <ul>
 
-                @foreach($products as $fl)
+                @foreach($products[1] as $fl)
                     @foreach($fl['product'] as  $key =>$value)
                         <li>
                             <div class="name"><a href="#">{{$value['name']}}</a></div>
@@ -385,6 +388,99 @@
       }
   }
 
+
+
+
+  $(function() {
+      //购物车
+      $(".car_t").mouseover(function () {
+
+          show_cartinfo($(this));
+
+      });
+
+      var carthtml = $(".car_bg ul").html();
+
+      function show_cartinfo(obj) {
+          //  $(".car_bg").html("");
+          $.get('/service/cart', {act: 'get_cart'}, function (res) {
+              if (res.status == 0) {
+                  $('.cartinfo').html(res.data.count);//购物车总数
+                  $('.cart-total').html(res.data.amount);//购物车总数
+                  var $html = '';
+
+                  if (res.data != false) {
+                      $.each(res.data.products, function (k, v) {
+                          $html += carthtml;
+                          $html = $html.replace(/\[id1\]/g, v.cart_pdt.id).replace(/\[preview1\]/g, v.cart_pdt.preview).replace(/\[name1\]/g, v.cart_pdt.name).replace(/\[price1\]/g, v.cart_pdt.price).replace(/\[count1\]/g,v.count).replace(/\[spec\]/g,v.cart_pdt.spec);
+                      });
+                  }
+                  $(".car_bg ul").html($html);
+                  //  alert($html);
+                  //移除商品
+                  $(".del").each(function() {
+                      $(this).click(function() {
+                          var p = $(this).parents("li");
+                          var id = p.attr("id");
+                          var spec = p.data("spec");
+                          removeGoods(id,p,spec);
+                      });
+                  });
+              }
+          }, 'json');
+      }
+
+  });
+  //加入购物车
+  function addCart(gid,direct,num,spec) {
+      $.get('/service/cart', {
+          act: 'add_cart',
+          gid: gid,
+          spec: spec,
+          type: 0,
+          num: num,
+          direct: direct }, function (res) {
+          if(res.status == 0){
+              layer.msg('加入购物车成功', {time:2000});
+              $('.cartinfo').html(res.count);
+          }else{
+              layer.msg(res.message, {time:2000});
+          }
+      },'json');
+  }
+
+
+
+  //购物车移除商品
+  function removeGoods(id,p,spec) {
+
+      $.get('/service/cart',{act:'remove_products',gid:id,spec:spec},function(res){
+          if(res.status ==0){
+              layer.msg('移除成功', {time:2000});
+              $('.cartinfo').html(res.count);
+              p.remove();
+          }
+
+      },'json');
+
+      /*
+              $.getJSON("/cart", {
+                  act: 'remove_goods',
+                  gid: ids,
+                  spec: spec
+              }, function(res) {
+                  if (res.err != '') {
+                      msg("删除失败，" + res.err);
+                  } else {
+                      msg("删除成功");
+                      $(".cartinfo").html(res.res);
+                      var list = ids.split("@");
+                      $.each(list, function (k, v) {
+                          $("#" + v).remove();
+                      });
+                  }
+              });*/
+  }
 
 </script>
 
