@@ -24,6 +24,14 @@
 //Route::post('service/login', 'service\MemberController@login');//验证登录信息
 
 
+
+
+
+
+
+
+
+
 //////////////////////////////////前台///////////////////////////////////////////////////
 
 	Route::get('/login', 'home\view\LoginController@toLogin');

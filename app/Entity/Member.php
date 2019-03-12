@@ -12,6 +12,27 @@ class Member extends Model
 	protected $guarded = [];
 	//保护字段
 
+	//test
+	////////////////////////
+
+	public function address(){
+
+		return $this->hasMany('App\Entity\Member_addr','member_id');
+	}
+
+
+
+
+
+	///////////////////////
+
+
+
+
+
+
+
+
 	//验证用户信息
 	public  static function userLogin($data){
 		$result = Member::where('phone',$data['username'])
@@ -20,6 +41,9 @@ class Member extends Model
 			->first();
 		return $result;
 	}
+
+
+
 
 	//获取会员的详细信息
 	public static  function getUser($uid = 0){

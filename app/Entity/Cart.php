@@ -14,8 +14,40 @@ class Cart extends Model
 	//保护字段
 
 
+	// 购物车列表
+	public static function getCartList($userId){
+		return Cart::where('member_id',$userId)->get()->toarray();
+	}
+
+	//更新购物车指定商品的数量
+	public static function updateGoodBuyNum($goodId = 0,$buyNum, $spec = ''){
+
+		$res =  Cart::where('product_id',$goodId)->where('spec',$spec)->update(['product_num' =>$buyNum ]);
+		return $res;
+	}
+
+	//勾选
+	public  static function checked($where){
+		$act = $where['act'];
+		$checked = $where['checked'];
+		if($act == 'one'){
+			$goodId = $where['id'];
+			$spec = $where['spec'];
+			$res = Cart::where('product_id',$goodId)->where('spec',$spec)->update(['is_checked'=>$checked]);
+			if(!$res) {
+				return 0;
+			}
+		}else if($act == 'all'){
+			Cart::where('member_id',70)->update(['is_checked'=>$checked]);
+		}
+		return 1;
+
+	}
+
+
+
 	/**
-	 * 购物车小计
+	 * 购物车商品总件数
 	 *
 	 * @return
 	 */
@@ -23,19 +55,13 @@ class Cart extends Model
 
 		$cartProducts = Cart::where('member_id',$id)->get();
 		$count = 0;//商品总件数
-		$type = count($cartProducts);//商品种类
-		$total = 0;
 		foreach ($cartProducts as $cartProduct){
 			$count += $cartProduct->product_num;
-			$total += $cartProduct->product_num *$cartProduct->price;
 		}
-
-		return array(
-			'count'=>$count,
-			'type'=>$type,
-			'total'=>$total
-		);
+		 return $count;
 	}
+
+
 	/**
 	 * 购物车移除产品
 	 * @param    $member_id

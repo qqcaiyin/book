@@ -22,4 +22,15 @@ class Myfav extends Model
 		return $data;
 	}
 
+	//获取某一位会员是否收藏指定商品
+	public static function userFavStatus($userId = 0,$goodId = 0){
+
+		$res =Myfav::where('member_id',$userId)
+			->where('product_id',$goodId )->first();
+		if($res){
+			return 1;
+		}
+		return 0;
+	}
+
 }

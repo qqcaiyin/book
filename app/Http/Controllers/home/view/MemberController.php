@@ -690,7 +690,6 @@ class MemberController extends commonController
 				break;
 			case 'edit_userinfo':
 //更改个人信息
-				//dd($data);
 				$arr=array();
 
 				$nickname = isset($data['username']) ? $data['username'] : '';
@@ -775,7 +774,7 @@ class MemberController extends commonController
 
 	/**
 	 * 用户输入过滤
-	 * @return[type][description]
+	 * @return
 	 */
 	protected function inputCheck($data){
 		foreach($data as $key =>&$d){

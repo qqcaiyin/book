@@ -12,6 +12,16 @@ class Pdt_sku extends Model
 	protected $guarded = [];
 	//保护字段
 
+	/**
+	 * 获取一个商品的 sku
+	 * @param  pdt_id 商品id
+	 * @param  spec 商品规格
+	 */
+	public static function getProductSku($goodId){
+		return Pdt_sku::where('product_id',$goodId)->get()->toarray();
+	}
+
+
 
 	/**
 	 * 获取一个商品信息

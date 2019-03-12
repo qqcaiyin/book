@@ -16,5 +16,6 @@ class VerifyCsrfToken extends BaseVerifier
 		'/service/pay/wx_notify',
 		'/service/upload/images',
 		'/service/uploadimg',
+		'/wx/*',
     ];
 }
