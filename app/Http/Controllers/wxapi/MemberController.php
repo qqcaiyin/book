@@ -3,33 +3,28 @@
 namespace App\Http\Controllers\Wxapi;
 
 use App\Entity\Member_addr;
+use App\Exceptions\ApiException;
 use App\Http\Repository\UserRepository;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Input;
 use App\Http\Requests;
 use App\Http\Requests\AddrRequest;
 use App\Http\Controllers\Controller;
-use App\Tool\SMS\SendTemplateSMS;
-use App\Entity\TempPhone;
 use App\Entity\Member;
-use App\Entity\TempEmail;
-use App\Models\M3Result;
-use App\Models\M3Email;
-//use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Facades\Session;
+
 use Illuminate\Validation\Validator;
 
 use DB;
+
 class MemberController extends ApiController
 {
 
-	protected $jsonRes;
 	protected $userRepository;
 
-	public function __construct(UserRepository $userRepository, M3Result $jsonRes)
+	public function __construct(UserRepository $userRepository)
 	{
 		$this->userRepository = $userRepository;
-		$this->jsonRes = $jsonRes;
 	}
 
 
@@ -40,18 +35,27 @@ class MemberController extends ApiController
 	 */
 	public function getList(AddrRequest $request){
 		$data = $request->all();
-		$userId =  intval($data['id']);
-		$addrList = Member_addr::getAddress($userId);
+		//根据token 获取当前用户id
+		$uid = $this->userRepository->getCurrentTokenVar($data['token']);
+		if(!$uid){
+			return $this->failed('token值异常');
+		}
+
+		$uid = 70;//测试用
+		$addrList = Member_addr::getAddress($uid);
 		return $this->respondWithSuccess($addrList);
 	}
 
 	/**
-	 * 获取收货地址列表
+	 * 获取收货地址详情
 	 *
 	 * @return
 	 */
 	public function addrDetails(AddrRequest $request){
 		$data = $request->all();
+		//根据token 获取当前用户id
+		$uid = $this->userRepository->getCurrentTokenVar($data['token']);
+
 		$id =  intval($data['id']);
 		$addrDetails = Member_addr::getAddrById($id);
 		return $this->respondWithSuccess($addrDetails);
@@ -64,10 +68,12 @@ class MemberController extends ApiController
 	 */
 	public function addrSave(AddrRequest $request){
 		$data = $this->requestCheck($request->all()) ;
+		$uid = $this->userRepository->getCurrentTokenVar($data['token']);
 		$id = $data['id'];
 	//	dd($data);
 		unset($data['pc']);
 		unset($data['id']);
+		unset($data['token']);
 
 		//开启事务
 		DB::beginTransaction();

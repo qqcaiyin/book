@@ -89,7 +89,7 @@ class GoodsController extends ApiController
 	 * 获取商品详情
 	 * @return
 	 */
-	public function getGoodsDetails( Request $request){
+	public function getGoodsDetails(Request $request){
 
 		$data = $this->requestCheck($request->all());
 

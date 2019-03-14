@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Exceptions\ApiException;
 use Illuminate\Database\Eloquent\Model;
 
 class Product extends Model
@@ -10,15 +11,17 @@ class Product extends Model
 	protected $primaryKey = 'id';
 	public $timestamps = false;
 	protected $guarded = [];
+
+	protected $hidden = ['is_del','keywords'];
 	//保护字段
 
+	//创建读取器
+	public function getPreviewAttribute($value){
 
-	//
-	public static function getProductInfo($id){
-
-
-
+		return config('config.img_pre') .$value;
 	}
+
+
 
 	/**
 	 * 获取一个商品信息
@@ -88,15 +91,16 @@ class Product extends Model
 	 * @param  spec 		商品规格
 	 * @return array
 	 */
-	public static function getProductsByIdSpec($product_id = 0,  $spec =''){
+	public static function getProductsByIdSpec($product_id = 0,  $spec = ''){
 		//获取产品详细信息
 		$product = Product::where('id',$product_id)->where('is_show',1)
 							->select('id','name','preview','price','num')
-							->first()->toarray();
+							->first();
 		if(empty($product)){
-			return null;
+			throw new ApiException('商品不存在');
 		}
-		if($spec != ''){
+		$product = $product->toarray();
+		if(!empty($spec)){
 			$spec_arr = explode(',',$spec);
 			//规格顺序颠倒
 			$spec_arr = array_reverse($spec_arr);
@@ -137,6 +141,8 @@ class Product extends Model
 		}
 		return $storeNum;
 	}
+
+
 
 
 

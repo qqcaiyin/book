@@ -40,17 +40,17 @@ class CartRepository{
 
 		//开启事务
 		DB::beginTransaction();
-			$updateRes = $this->cart->updateGoodBuyNum($goodId,$buyNum,$spec);
-			$storeNum =  Product::getProductNum($goodId,$spec);
+		$updateRes = $this->cart->updateGoodBuyNum($goodId,$buyNum,$spec);
+		$storeNum =  Product::getProductNum($goodId,$spec);
 
-			if($updateRes &&($storeNum >= $buyNum)){
-				DB::commit();
-				return array(
-					'storeNum'=>$storeNum,
-					'status' =>0
-				);
-			}
-			DB::rollBack();
+		if($updateRes &&($storeNum >= $buyNum)){
+			DB::commit();
+			return array(
+				'storeNum'=>$storeNum,
+				'status' =>0
+			);
+		}
+		DB::rollBack();
 		return array(
 			'storeNum'=>$storeNum,
 			'status' =>1

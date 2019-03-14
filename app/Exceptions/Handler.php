@@ -40,9 +40,8 @@ class Handler extends ExceptionHandler
      * @param  \Exception  $e
      * @return \Illuminate\Http\Response
      */
-    public function render($request, Exception $e)
+ /*   public function render($request, Exception $e)
     {
-
 
         if ($e instanceof ModelNotFoundException) {
             $e = new NotFoundHttpException($e->getMessage(), $e);
@@ -50,4 +49,20 @@ class Handler extends ExceptionHandler
 
         return parent::render($request, $e);
     }
+    */
+	public function  render($request, Exception $e){
+		//如果$exception 是 ApiException的一个实例，则自定义返回的错误信息
+		if($e instanceof ApiException){
+			$result = [
+				"code"=>404,
+				"msg"=>$e->getMessage(),
+				"data"=>""
+			];
+			return response()->json($result);
+		}
+		//如果不是，则使用 父类的处理方法
+		return parent::render($request, $e);
+
+	}
+
 }

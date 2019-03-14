@@ -3,6 +3,8 @@
 	 * Api
 	 */
 
+	Route::post('/wx/token/user', 'wxapi\TokenController@getToken');
+
 	Route::any('/wx/login', 'wxapi\AuthenController@toLogin');
 
 
@@ -35,3 +37,16 @@
 
 	//下单
 	Route::get('/wx/order-checkout','wxapi\OrderController@checkOut');//下单前信息确认
+	Route::get('/wx/order-checkout1','wxapi\OrderController@checkOut1');//直接购买链接传递
+	Route::post('/wx/creat-order','wxapi\OrderController@creatOrder');//下单
+
+
+
+
+
+	//需要验证登陆
+Route::group([ 'middleware' => 'check.login','prefix' => 'admin'],function() {
+
+
+
+});
