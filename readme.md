@@ -15,7 +15,8 @@ web端
 小程序端
 -------------
 1.分类列表
-![](https://github.com/qqcaiyin/book/img/wx/wx-category.png)
+
+![image](https://github.com/qqcaiyin/book/blob/master/img/wx/wx-categoty.png)
 
 
 
