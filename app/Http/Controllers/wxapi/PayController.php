@@ -42,6 +42,7 @@ class PayController extends ApiController
 
 		$data = $request->all();
 
+		
 		$storeNum = $this->cartRepository->changeBuyNum(  $data['id'], $data['num']  , $data['spec']);
 		if($storeNum){
 			return $this->respondWithSuccess($storeNum);
