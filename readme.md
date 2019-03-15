@@ -21,3 +21,5 @@ web端
 
 
 2.购物车
+
+![image](https://github.com/qqcaiyin/book/blob/master/img/wx/wx-cart.png)
